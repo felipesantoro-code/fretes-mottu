@@ -1,0 +1,2828 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Solicitação de Fretes — Mottu</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Barlow:ital,wght@1,700;1,800&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#000;--bg2:#121212;--bg3:#1a1a1a;--bg4:#222;
+  --border:rgba(255,255,255,0.08);--border2:rgba(255,255,255,0.14);
+  --text:#fff;--text2:#a0a0a0;--text3:#5a5a5a;
+  --accent:#00b131;--accent2:#009929;--accent-dim:rgba(0,177,49,0.15);--accent-dim2:rgba(0,177,49,0.07);
+  --blue:#4a9eff;--blue-dim:rgba(74,158,255,0.12);
+  --green:#00b131;--green-dim:rgba(0,177,49,0.12);
+  --orange:#ff8c42;--orange-dim:rgba(255,140,66,0.12);
+  --red:#ff5f5f;--red-dim:rgba(255,95,95,0.12);
+  --purple:#b57bff;--purple-dim:rgba(181,123,255,0.12);
+  --yellow:#f5c518;--yellow-dim:rgba(245,197,24,0.12);
+  --radius:10px;--radius-lg:16px;
+  --font-display:'Barlow',sans-serif;--font-body:'Poppins',sans-serif;
+  --t:0.18s cubic-bezier(0.4,0,0.2,1);
+}
+html,body{height:100%;font-family:var(--font-body);background:var(--bg);color:var(--text);font-size:14px;line-height:1.5}
+button{cursor:pointer;font-family:var(--font-body);border:none;background:none;color:inherit}
+input,textarea,select{font-family:var(--font-body);font-size:14px;color:var(--text)}
+a{color:inherit;text-decoration:none}
+::-webkit-scrollbar{width:4px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px}
+
+/* TOAST */
+#toast-container{position:fixed;bottom:24px;right:24px;z-index:9999;display:flex;flex-direction:column;gap:8px}
+.toast{padding:12px 18px;border-radius:var(--radius);font-size:13px;font-weight:500;animation:tin .3s ease;max-width:320px}
+.toast.success{background:var(--green);color:#001a08}.toast.error{background:var(--red);color:#2a0a0a}.toast.info{background:var(--accent);color:#001a08}
+@keyframes tin{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+
+/* SCREENS */
+.screen{display:none;min-height:100vh}.screen.active{display:flex}
+
+/* LOGIN */
+#screen-login{align-items:center;justify-content:center;flex-direction:column;position:relative;overflow:hidden}
+#screen-login::before{content:'';position:absolute;width:600px;height:600px;background:radial-gradient(circle,rgba(0,177,49,.08) 0%,transparent 70%);top:-200px;left:-200px;pointer-events:none}
+#screen-login::after{content:'';position:absolute;width:400px;height:400px;background:radial-gradient(circle,rgba(0,177,49,.05) 0%,transparent 70%);bottom:-100px;right:-100px;pointer-events:none}
+.login-card{background:var(--bg2);border:1px solid var(--border2);border-radius:var(--radius-lg);padding:48px 44px;width:420px;position:relative;z-index:1}
+.login-logo{font-family:var(--font-display);font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--text3);margin-bottom:4px}
+.login-logo-mark{font-family:var(--font-display);font-style:italic;font-weight:800;font-size:30px;text-transform:uppercase;letter-spacing:-.5px;color:var(--text);line-height:1;margin-bottom:4px}
+.login-logo-mark span{color:var(--accent)}
+.login-sub{color:var(--text2);font-size:13px;margin-bottom:36px}
+.login-tabs{display:flex;gap:4px;background:var(--bg3);border-radius:8px;padding:3px;margin-bottom:28px}
+.login-tab{flex:1;padding:8px;text-align:center;font-size:12px;font-weight:500;border-radius:6px;color:var(--text2);cursor:pointer;transition:var(--t)}
+.login-tab.active{background:var(--bg4);color:var(--text)}
+.field{margin-bottom:16px}
+.field label{display:block;font-size:11px;font-weight:600;color:var(--text2);margin-bottom:6px;letter-spacing:.4px;text-transform:uppercase}
+.field input,.field select,.field textarea{width:100%;padding:10px 14px;background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);transition:var(--t);outline:none}
+.field input:focus,.field select:focus,.field textarea:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-dim)}
+.field input::placeholder,.field textarea::placeholder{color:var(--text3)}
+.field select option{background:var(--bg3)}
+.btn-primary{width:100%;padding:12px;background:var(--accent);color:#fff;font-family:var(--font-display);font-size:14px;font-weight:700;font-style:italic;text-transform:uppercase;letter-spacing:.8px;border-radius:var(--radius);transition:var(--t)}
+.btn-primary:hover{background:var(--accent2);transform:translateY(-1px)}
+.demo-hint{margin-top:24px;padding:12px 14px;background:var(--accent-dim2);border:1px solid rgba(0,177,49,.15);border-radius:8px;font-size:12px;color:var(--text2);line-height:1.7}
+.demo-hint strong{color:var(--accent)}
+
+/* APP SHELL */
+#screen-app{flex-direction:row}
+.sidebar{width:220px;min-height:100vh;background:var(--bg2);border-right:1px solid var(--border);display:flex;flex-direction:column;position:fixed;top:0;left:0;bottom:0;z-index:100}
+.sidebar-logo{padding:18px 20px 14px;border-bottom:1px solid var(--border)}
+.sidebar-logo .lbl{font-size:9px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;color:var(--text3);margin-bottom:2px}
+.sidebar-logo .nm{font-family:var(--font-display);font-style:italic;font-weight:800;font-size:17px;text-transform:uppercase;letter-spacing:-.3px;line-height:1}
+.sidebar-logo .nm span{color:var(--accent)}
+.sidebar-role{padding:10px 20px;font-size:10px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:var(--text3);border-bottom:1px solid var(--border)}
+.sidebar-nav{flex:1;padding:12px 10px}
+.nav-item{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:8px;font-size:13px;color:var(--text2);cursor:pointer;transition:var(--t);margin-bottom:2px;border-left:2px solid transparent}
+.nav-item:hover{background:var(--bg3);color:var(--text)}
+.nav-item.active{background:var(--accent-dim);color:var(--accent);font-weight:500;border-left-color:var(--accent)}
+.nav-icon{font-size:16px;width:20px;text-align:center}
+.nav-badge{margin-left:auto;background:var(--red);color:#fff;font-size:10px;font-weight:700;padding:1px 6px;border-radius:10px}
+.sidebar-user{padding:14px 20px;border-top:1px solid var(--border);display:flex;align-items:center;gap:10px}
+.user-avatar{width:32px;height:32px;border-radius:50%;background:var(--accent-dim);border:1px solid var(--accent);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:var(--accent);font-family:var(--font-display)}
+.user-info{flex:1;min-width:0}
+.user-name{font-size:13px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.user-email{font-size:11px;color:var(--text3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.btn-logout{font-size:18px;color:var(--text3);transition:var(--t);padding:4px;border-radius:4px}
+.btn-logout:hover{color:var(--red)}
+
+/* MAIN */
+.main{margin-left:220px;flex:1;min-height:100vh;display:flex;flex-direction:column}
+.topbar{padding:18px 28px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;background:var(--bg);position:sticky;top:0;z-index:50}
+.page-title{font-family:var(--font-display);font-style:italic;font-weight:800;font-size:22px;text-transform:uppercase;letter-spacing:-.2px}
+.topbar-actions{display:flex;gap:10px;align-items:center}
+.btn-accent{padding:8px 18px;background:var(--accent);color:#fff;font-family:var(--font-display);font-size:13px;font-weight:700;font-style:italic;text-transform:uppercase;letter-spacing:.5px;border-radius:8px;transition:var(--t)}
+.btn-accent:hover{background:var(--accent2)}
+.btn-secondary{padding:8px 16px;background:var(--bg3);color:var(--text2);font-size:13px;border-radius:8px;border:1px solid var(--border);transition:var(--t)}
+.btn-secondary:hover{background:var(--bg4);color:var(--text);border-color:var(--border2)}
+.btn-ghost{padding:6px 12px;background:transparent;color:var(--text2);font-size:12px;border-radius:7px;border:1px solid var(--border);transition:var(--t)}
+.btn-ghost:hover{border-color:var(--border2);color:var(--text)}
+.content{padding:28px;flex:1}
+
+/* STATS */
+.stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:28px}
+.stat-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius-lg);padding:20px}
+.stat-label{font-size:11px;font-weight:600;letter-spacing:.8px;text-transform:uppercase;color:var(--text3);margin-bottom:8px}
+.stat-value{font-family:var(--font-display);font-style:italic;font-size:32px;font-weight:800;line-height:1;text-transform:uppercase}
+.stat-sub{font-size:12px;color:var(--text2);margin-top:6px}
+.stat-card.accent{border-color:rgba(0,177,49,.25)}.stat-card.accent .stat-value{color:var(--accent)}
+
+/* TABLE */
+.table-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius-lg);overflow:hidden}
+.table-header{padding:16px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px}
+.table-title{font-family:var(--font-display);font-style:italic;font-weight:800;font-size:15px;text-transform:uppercase}
+table{width:100%;border-collapse:collapse}
+thead th{padding:10px 16px;text-align:left;font-size:11px;font-weight:600;letter-spacing:.6px;text-transform:uppercase;color:var(--text3);border-bottom:1px solid var(--border);background:var(--bg3)}
+tbody tr{border-bottom:1px solid var(--border);transition:var(--t)}
+tbody tr:last-child{border-bottom:none}
+tbody tr:hover{background:var(--bg3)}
+tbody td{padding:12px 16px;font-size:13px;color:var(--text2)}
+tbody td.tdm{color:var(--text);font-weight:500}
+.empty-state{text-align:center;padding:48px 20px;color:var(--text3);font-size:13px}
+.empty-icon{font-size:32px;margin-bottom:10px}
+
+/* BADGES */
+.badge{display:inline-flex;align-items:center;gap:5px;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:600;letter-spacing:.3px}
+.badge::before{content:'';width:5px;height:5px;border-radius:50%;background:currentColor}
+.badge.pending{background:var(--orange-dim);color:var(--orange)}
+.badge.approved{background:var(--blue-dim);color:var(--blue)}
+.badge.bidding{background:var(--yellow-dim);color:var(--yellow)}
+.badge.transit{background:var(--purple-dim);color:var(--purple)}
+.badge.done{background:var(--green-dim);color:var(--green)}
+.badge.rejected{background:var(--red-dim);color:var(--red)}
+.badge.auto{background:var(--accent-dim);color:var(--accent)}
+
+/* ACTION BTNS */
+.action-btn{padding:5px 10px;border-radius:6px;font-size:11px;font-weight:600;border:1px solid var(--border);color:var(--text2);transition:var(--t);margin-right:4px}
+.action-btn:hover{border-color:var(--accent);color:var(--accent);background:var(--accent-dim2)}
+.action-btn.approve{border-color:rgba(61,214,140,.3);color:var(--green)}
+.action-btn.approve:hover{background:var(--green-dim);border-color:var(--green)}
+.action-btn.reject{border-color:rgba(255,95,95,.2);color:var(--red)}
+.action-btn.reject:hover{background:var(--red-dim);border-color:var(--red)}
+.action-btn.view{border-color:rgba(74,158,255,.2);color:var(--blue)}
+.action-btn.view:hover{background:var(--blue-dim);border-color:var(--blue)}
+.action-btn.bid{border-color:rgba(245,197,24,.2);color:var(--yellow)}
+.action-btn.bid:hover{background:var(--yellow-dim);border-color:var(--yellow)}
+
+/* MODAL */
+.modal-overlay{display:none;position:fixed;inset:0;z-index:500;background:rgba(0,0,0,.75);backdrop-filter:blur(4px);align-items:center;justify-content:center}
+.modal-overlay.open{display:flex}
+.modal{background:var(--bg2);border:1px solid var(--border2);border-radius:var(--radius-lg);width:600px;max-width:95vw;max-height:90vh;overflow-y:auto}
+.modal.narrow{width:440px}
+.modal-head{padding:22px 28px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;background:var(--bg2);z-index:1}
+.modal-title{font-family:var(--font-display);font-style:italic;font-weight:800;font-size:18px;text-transform:uppercase}
+.modal-close{font-size:22px;color:var(--text3);transition:var(--t);padding:4px;border-radius:4px}
+.modal-close:hover{color:var(--text)}
+.modal-body{padding:24px 28px}
+.modal-footer{padding:16px 28px;border-top:1px solid var(--border);display:flex;gap:10px;justify-content:flex-end}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.form-section{margin-bottom:20px}
+.form-section-title{font-size:11px;font-weight:600;letter-spacing:.8px;text-transform:uppercase;color:var(--text3);margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid var(--border)}
+
+/* TIPO FRETE SELECTOR */
+.tipo-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:8px}
+.tipo-card{padding:16px 12px;background:var(--bg3);border:2px solid var(--border);border-radius:var(--radius);cursor:pointer;text-align:center;transition:var(--t);position:relative}
+.tipo-card:hover:not(.disabled){border-color:var(--border2);background:var(--bg4)}
+.tipo-card.selected{border-color:var(--accent);background:var(--accent-dim)}
+.tipo-card.disabled{opacity:.4;cursor:not-allowed}
+.tipo-card .tipo-icon{font-size:24px;margin-bottom:6px}
+.tipo-card .tipo-nome{font-family:var(--font-display);font-style:italic;font-weight:800;font-size:13px;text-transform:uppercase;color:var(--text)}
+.tipo-card .tipo-desc{font-size:11px;color:var(--text3);margin-top:3px;line-height:1.4}
+.tipo-card.selected .tipo-nome{color:var(--accent)}
+.tipo-badge-soon{position:absolute;top:6px;right:6px;font-size:9px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;background:var(--bg4);border:1px solid var(--border2);color:var(--text3);padding:2px 6px;border-radius:4px}
+
+/* PERFIL CARGA */
+.perfil-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:8px}
+.perfil-card{padding:12px 8px;background:var(--bg3);border:2px solid var(--border);border-radius:var(--radius);cursor:pointer;text-align:center;transition:var(--t)}
+.perfil-card:hover{border-color:var(--border2)}
+.perfil-card.selected{border-color:var(--accent);background:var(--accent-dim)}
+.perfil-card .picon{font-size:20px;margin-bottom:4px}
+.perfil-card .pnome{font-size:11px;font-weight:600;color:var(--text2)}
+.perfil-card.selected .pnome{color:var(--accent)}
+.recomendacao{margin-top:10px;padding:10px 14px;border-radius:8px;font-size:12px;display:none}
+.recomendacao.show{display:flex;align-items:flex-start;gap:10px}
+.recomendacao.correios{background:rgba(245,197,24,.08);border:1px solid rgba(245,197,24,.2);color:var(--yellow)}
+.recomendacao.transportadora{background:var(--accent-dim2);border:1px solid rgba(0,177,49,.15);color:var(--accent)}
+
+/* MULTI-PONTOS */
+.pontos-list{display:flex;flex-direction:column;gap:8px}
+.ponto-item{display:flex;align-items:flex-start;gap:8px}
+.ponto-type{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0;margin-top:6px}
+.ponto-type.coleta{background:var(--blue-dim);color:var(--blue);border:1px solid var(--blue)}
+.ponto-type.entrega{background:var(--green-dim);color:var(--green);border:1px solid var(--green)}
+.ponto-content{flex:1}
+.ponto-remove{width:28px;height:28px;display:flex;align-items:center;justify-content:center;color:var(--text3);cursor:pointer;border-radius:6px;transition:var(--t);margin-top:6px;flex-shrink:0}
+.ponto-remove:hover{color:var(--red);background:var(--red-dim)}
+.add-ponto-row{display:flex;gap:8px;margin-top:8px}
+.btn-add-ponto{flex:1;padding:8px;background:var(--bg3);border:1px dashed var(--border2);border-radius:8px;font-size:12px;color:var(--text3);transition:var(--t);text-align:center}
+.btn-add-ponto:hover{border-color:var(--accent);color:var(--accent);background:var(--accent-dim2)}
+.ponto-connector{width:1px;background:var(--border);height:8px;margin-left:13px}
+
+/* FILIAL PICKER */
+.filial-picker{position:relative}
+.filial-picker input{width:100%}
+.filial-dropdown{display:none;position:absolute;top:calc(100% + 4px);left:0;right:0;z-index:300;background:var(--bg3);border:1px solid var(--border2);border-radius:var(--radius);max-height:200px;overflow-y:auto;box-shadow:0 8px 24px rgba(0,0,0,.5)}
+.filial-dropdown.open{display:block}
+.filial-opt{padding:9px 14px;cursor:pointer;border-bottom:1px solid var(--border);transition:var(--t)}
+.filial-opt:last-child{border-bottom:none}
+.filial-opt:hover{background:var(--accent-dim)}
+.filial-opt-nome{font-size:13px;font-weight:500;color:var(--text)}
+.filial-opt-end{font-size:11px;color:var(--text3);margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.fbadge{display:inline-block;font-size:9px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;padding:1px 5px;border-radius:4px;margin-left:5px;vertical-align:middle}
+.fbadge.cd{background:var(--purple-dim);color:var(--purple)}
+.fbadge.filial{background:var(--accent-dim);color:var(--accent)}
+.filial-selected-card{margin-top:6px;padding:8px 12px;background:var(--accent-dim2);border:1px solid rgba(0,177,49,.2);border-radius:7px;display:none}
+.filial-selected-card.show{display:block}
+.fsc-nome{font-size:12px;font-weight:600;color:var(--accent)}
+.fsc-end{font-size:11px;color:var(--text2);margin-top:1px}
+
+/* UPLOAD */
+.upload-area{border:1.5px dashed var(--border2);border-radius:var(--radius);padding:16px;text-align:center;cursor:pointer;transition:var(--t);background:var(--bg3)}
+.upload-area:hover,.upload-area.dragover{border-color:var(--accent);background:var(--accent-dim2)}
+.upload-area p{font-size:12px;color:var(--text2);margin-top:4px}
+.uploaded-file{display:flex;align-items:center;gap:10px;padding:8px 12px;background:var(--bg3);border:1px solid var(--border);border-radius:8px;margin-top:6px}
+.file-name{flex:1;font-size:12px;font-weight:500}
+.file-size{font-size:11px;color:var(--text3)}
+.file-remove{color:var(--red);cursor:pointer;font-size:14px}
+
+/* ROTEIRO VISUAL */
+.roteiro{background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius);padding:14px;margin-top:8px}
+.roteiro-item{display:flex;align-items:center;gap:10px;padding:6px 0;position:relative}
+.roteiro-item:not(:last-child)::after{content:'';position:absolute;left:11px;top:28px;width:1px;height:12px;background:var(--border2)}
+.roteiro-dot{width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;flex-shrink:0}
+.roteiro-dot.c{background:var(--blue-dim);color:var(--blue);border:1px solid var(--blue)}
+.roteiro-dot.e{background:var(--green-dim);color:var(--green);border:1px solid var(--green)}
+.roteiro-info .rn{font-size:12px;font-weight:500;color:var(--text)}
+.roteiro-info .ra{font-size:11px;color:var(--text3)}
+
+/* LANCES */
+.lance-card{background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius-lg);padding:16px;margin-bottom:10px;transition:var(--t)}
+.lance-card:hover{border-color:var(--border2)}
+.lance-card.winner{border-color:var(--accent);background:var(--accent-dim2)}
+.lance-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.lance-transp{font-weight:600;font-size:14px}
+.lance-valor{font-family:var(--font-display);font-style:italic;font-weight:800;font-size:20px;color:var(--accent)}
+.lance-details{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.lance-detail label{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:var(--text3)}
+.lance-detail p{font-size:13px;color:var(--text);margin-top:2px}
+
+/* REGRAS ALOCACAO */
+.regra-card{background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius);padding:14px;margin-bottom:8px;display:flex;align-items:center;gap:12px}
+.regra-info{flex:1}
+.regra-nome{font-size:13px;font-weight:500;color:var(--text)}
+.regra-desc{font-size:11px;color:var(--text3);margin-top:2px}
+.regra-remove{color:var(--text3);cursor:pointer;padding:4px;border-radius:4px;transition:var(--t)}
+.regra-remove:hover{color:var(--red)}
+
+/* TIMELINE */
+.timeline .tl-item{display:flex;gap:12px;padding:8px 0;position:relative}
+.timeline .tl-item:not(:last-child)::before{content:'';position:absolute;left:6px;top:26px;bottom:-8px;width:1px;background:var(--border)}
+.tl-dot{width:13px;height:13px;border-radius:50%;background:var(--bg3);border:2px solid var(--border2);flex-shrink:0;margin-top:2px}
+.tl-dot.done{background:var(--accent);border-color:var(--accent)}
+.tl-title{font-size:13px;font-weight:500;color:var(--text)}
+.tl-time{font-size:11px;color:var(--text3);margin-top:1px}
+
+/* DETAIL */
+.detail-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:16px}
+.detail-item label{font-size:10px;font-weight:600;letter-spacing:.8px;text-transform:uppercase;color:var(--text3);margin-bottom:3px;display:block}
+.detail-item p{font-size:14px;color:var(--text)}
+
+/* FRETE TYPE TAG */
+.ftype-tag{display:inline-flex;align-items:center;gap:5px;padding:3px 10px;border-radius:6px;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.3px}
+.ftype-tag.spot{background:var(--blue-dim);color:var(--blue)}
+.ftype-tag.fornecedor{background:var(--orange-dim);color:var(--orange)}
+.ftype-tag.rota{background:var(--purple-dim);color:var(--purple)}
+
+@media(max-width:900px){
+  .stats-grid{grid-template-columns:1fr 1fr}
+  .sidebar{width:60px}
+  .sidebar-logo .lbl,.sidebar-logo .nm,.sidebar-role,.nav-item span:not(.nav-icon),.user-info,.btn-logout{display:none}
+  .main{margin-left:60px}
+  .nav-item{justify-content:center}
+  .tipo-grid{grid-template-columns:1fr 1fr}
+  .perfil-grid{grid-template-columns:repeat(2,1fr)}
+}
+
+/* ESTADOS */
+.estados-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+.estado-item{display:flex;align-items:center;gap:6px;padding:6px 8px;background:var(--bg3);border:1px solid var(--border);border-radius:6px;cursor:pointer;transition:var(--t);user-select:none}
+.estado-item:hover{border-color:var(--border2)}
+.estado-item.ativo{border-color:var(--accent);background:var(--accent-dim)}
+.estado-item input[type=checkbox]{width:13px;height:13px;accent-color:var(--accent);cursor:pointer;flex-shrink:0}
+.estado-item span{font-size:12px;color:var(--text2)}
+.estado-item.ativo span{color:var(--accent);font-weight:500}
+/* HUB */
+.hub-destino-item{background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius);padding:14px;margin-bottom:8px;transition:var(--t)}
+.hub-destino-item.ativo{border-color:var(--accent);background:var(--accent-dim2)}
+.hub-destino-check{display:flex;align-items:center;gap:10px;cursor:pointer;user-select:none}
+.hub-destino-check input[type=checkbox]{width:16px;height:16px;accent-color:var(--accent);cursor:pointer;flex-shrink:0}
+.hub-destino-nome{font-size:13px;font-weight:500;color:var(--text)}
+.hub-destino-fields{margin-top:12px;display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.hub-foto-preview{margin-top:8px}
+</style>
+</head>
+<body>
+<div id="toast-container"></div>
+
+<!-- LOGIN -->
+<div id="screen-login" class="screen active">
+  <div class="login-card">
+    <div class="login-logo">Mottu</div>
+    <div class="login-logo-mark">Solicitação de <span>Fretes</span></div>
+    <div class="login-sub">Gerencie e acompanhe fretes da empresa</div>
+    <div class="login-tabs">
+      <div class="login-tab active" onclick="switchTab('login')">Entrar</div>
+      <div class="login-tab" onclick="switchTab('register')">Cadastrar</div>
+    </div>
+    <div id="form-login">
+      <div class="field"><label>E-mail</label><input type="email" id="login-email" placeholder="seu@empresa.com.br"></div>
+      <div class="field"><label>Senha</label><input type="password" id="login-pass" placeholder="••••••••"></div>
+      <button class="btn-primary" onclick="doLogin()">Entrar</button>
+      <div class="demo-hint"><strong>Contas demo:</strong><br>gestor@empresa.com / <strong>123456</strong> — Gestor<br>joao@empresa.com / <strong>123456</strong> — Solicitante<br>transportadora@frete.com / <strong>123456</strong> — Transportador</div>
+    </div>
+    <div id="form-register" style="display:none">
+      <div class="form-row">
+        <div class="field"><label>Nome completo</label><input type="text" id="reg-name"></div>
+        <div class="field"><label>Setor</label><input type="text" id="reg-setor"></div>
+      </div>
+      <div class="field"><label>E-mail corporativo</label><input type="email" id="reg-email"></div>
+      <div class="field"><label>Senha</label><input type="password" id="reg-pass"></div>
+      <button class="btn-primary" onclick="doRegister()">Criar conta</button>
+    </div>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="screen-app" class="screen">
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <div class="lbl">Mottu</div>
+      <div class="nm">Solicitação de <span>Fretes</span></div>
+    </div>
+    <div class="sidebar-role" id="sidebar-role-label"></div>
+    <nav class="sidebar-nav" id="sidebar-nav"></nav>
+    <div class="sidebar-user">
+      <div class="user-avatar" id="user-av">--</div>
+      <div class="user-info">
+        <div class="user-name" id="user-nm">--</div>
+        <div class="user-email" id="user-em">--</div>
+      </div>
+      <button class="btn-logout" onclick="doLogout()" title="Sair">⎋</button>
+    </div>
+  </aside>
+  <main class="main">
+    <div class="topbar">
+      <div class="page-title" id="topbar-title">Dashboard</div>
+      <div class="topbar-actions" id="topbar-actions"></div>
+    </div>
+    <div class="content" id="main-content"></div>
+  </main>
+</div>
+
+<!-- MODAL: NOVA SOLICITAÇÃO -->
+<div class="modal-overlay" id="modal-solicitar">
+  <div class="modal">
+    <div class="modal-head">
+      <div class="modal-title" id="modal-sol-title">Nova solicitação</div>
+      <button class="modal-close" onclick="closeModal('modal-solicitar')">✕</button>
+    </div>
+    <div class="modal-body">
+
+      <!-- STEP 1: Tipo -->
+      <div id="step-tipo">
+        <div class="form-section-title" style="margin-bottom:14px">Qual tipo de frete você precisa?</div>
+        <div class="tipo-grid">
+          <div class="tipo-card" onclick="selecionarTipo('spot')">
+            <div class="tipo-icon">🔀</div>
+            <div class="tipo-nome">Frete Spot</div>
+            <div class="tipo-desc">Entre filiais, filial→CD ou CD→filial fora de rota</div>
+          </div>
+          <div class="tipo-card" onclick="selecionarTipo('hub')">
+            <div class="tipo-icon">🏪</div>
+            <div class="tipo-nome">Coleta em Hub</div>
+            <div class="tipo-desc">Mercadoria chegou no hub — solicitar transporte para destinos finais</div>
+          </div>
+          <div class="tipo-card disabled">
+            <div class="tipo-badge-soon">Em breve</div>
+            <div class="tipo-icon">🗺️</div>
+            <div class="tipo-nome">Rota CD</div>
+            <div class="tipo-desc">Embarque em rota semanal programada</div>
+          </div>
+          <div class="tipo-card disabled">
+            <div class="tipo-badge-soon">Em breve</div>
+            <div class="tipo-icon">🏭</div>
+            <div class="tipo-nome">Frete Fornecedor</div>
+            <div class="tipo-desc">Coleta em fornecedor externo por conta Mottu</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- STEP 3: Formulário Hub -->
+      <div id="step-hub" style="display:none">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:20px">
+          <button class="btn-ghost" onclick="voltarTipo()">← Voltar</button>
+          <span class="ftype-tag" style="background:var(--orange-dim);color:var(--orange)">🏪 Coleta em Hub</span>
+        </div>
+
+        <div class="form-section">
+          <div class="form-section-title">Hub de origem *</div>
+          <div class="field" style="margin-bottom:0">
+            <select id="hub-origem" onchange="renderDestinosHub(this.value)">
+              <option value="">Selecione o hub...</option>
+            </select>
+          </div>
+        </div>
+
+        <div id="hub-destinos-section" style="display:none">
+          <div class="form-section">
+            <div class="form-section-title">Destinos com mercadoria *</div>
+            <div style="padding:10px 12px;background:var(--bg3);border-left:3px solid var(--orange);border-radius:0 6px 6px 0;margin-bottom:14px;font-size:12px;color:var(--text2);line-height:1.6">
+              Marque apenas os destinos que têm mercadoria para coleta nesta semana. Para cada destino marcado, informe a quantidade de pallets e adicione uma foto.
+            </div>
+            <div id="hub-destinos-list"></div>
+          </div>
+
+          <div class="form-section">
+            <div class="form-section-title">Data ideal de coleta *</div>
+            <div class="field" style="margin-bottom:0">
+              <input type="date" id="hub-data">
+            </div>
+          </div>
+
+          <div class="form-section">
+            <div class="form-section-title">Observações</div>
+            <div class="field" style="margin-bottom:0">
+              <textarea id="hub-obs" rows="2" placeholder="Informações adicionais sobre a mercadoria ou coleta..."></textarea>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- STEP 2: Formulário Spot -->
+      <div id="step-form" style="display:none">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:20px">
+          <button class="btn-ghost" onclick="voltarTipo()">← Voltar</button>
+          <span class="ftype-tag spot">🔀 Frete Spot</span>
+        </div>
+
+        <!-- Perfil da carga -->
+        <div class="form-section">
+          <div class="form-section-title">Perfil da carga *</div>
+          <div class="perfil-grid">
+            <div class="perfil-card" onclick="selecionarPerfil('envelope')" id="perfil-envelope">
+              <div class="picon">✉️</div><div class="pnome">Envelope / Doc</div>
+            </div>
+            <div class="perfil-card" onclick="selecionarPerfil('caixa')" id="perfil-caixa">
+              <div class="picon">📦</div><div class="pnome">Caixa pequena</div>
+            </div>
+            <div class="perfil-card" onclick="selecionarPerfil('volumes')" id="perfil-volumes">
+              <div class="picon">🗃️</div><div class="pnome">Volumes / Caixas</div>
+            </div>
+            <div class="perfil-card" onclick="selecionarPerfil('pallet')" id="perfil-pallet">
+              <div class="picon">🏗️</div><div class="pnome">Pallet / Carga pesada</div>
+            </div>
+          </div>
+          <div class="recomendacao correios" id="rec-correios">
+            <span style="font-size:18px">💡</span>
+            <div><strong>Sugestão:</strong> Para cargas pequenas, considere Correios, Jadlog ou Loggi — geralmente mais rápidos e econômicos para este perfil. Você ainda pode prosseguir com o frete spot se preferir.</div>
+          </div>
+          <div class="recomendacao transportadora" id="rec-transp">
+            <span style="font-size:18px">✅</span>
+            <div><strong>Frete spot ideal</strong> para este perfil. Transportadoras e autônomos cadastrados receberão sua solicitação para dar lance.</div>
+          </div>
+        </div>
+
+        <!-- Pontos de coleta e entrega -->
+        <div class="form-section">
+          <div class="form-section-title">Roteiro — coletas e entregas</div>
+          <div style="padding:10px 12px;background:var(--bg3);border-left:3px solid var(--accent);border-radius:0 6px 6px 0;margin-bottom:14px;font-size:12px;color:var(--text2);line-height:1.6">
+            Use os botões abaixo para adicionar <strong style="color:var(--text)">paradas do mesmo frete</strong> — por exemplo, coletar em duas filiais próximas e entregar em uma só. Se precisar de um frete diferente e sem relação com este, crie uma nova solicitação separada.
+          </div>
+
+          <!-- COLETAS -->
+          <div style="margin-bottom:16px">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+              <div style="font-size:11px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:var(--blue);display:flex;align-items:center;gap:6px">
+                <span style="width:18px;height:18px;border-radius:50%;background:var(--blue-dim);border:1px solid var(--blue);display:inline-flex;align-items:center;justify-content:center;font-size:9px">C</span>
+                Pontos de coleta
+              </div>
+              <button class="btn-add-ponto" style="flex:none;padding:5px 12px;font-size:11px" onclick="addPonto('coleta')">＋ Adicionar coleta</button>
+            </div>
+            <div id="coletas-list"></div>
+          </div>
+
+          <!-- ENTREGAS -->
+          <div style="margin-bottom:12px">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+              <div style="font-size:11px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:var(--green);display:flex;align-items:center;gap:6px">
+                <span style="width:18px;height:18px;border-radius:50%;background:var(--green-dim);border:1px solid var(--green);display:inline-flex;align-items:center;justify-content:center;font-size:9px">E</span>
+                Pontos de entrega
+              </div>
+              <button class="btn-add-ponto" style="flex:none;padding:5px 12px;font-size:11px" onclick="addPonto('entrega')">＋ Adicionar entrega</button>
+            </div>
+            <div id="entregas-list"></div>
+          </div>
+
+          <!-- ROTEIRO RESUMIDO -->
+          <div id="roteiro-preview" style="display:none">
+            <div style="font-size:11px;font-weight:600;letter-spacing:.5px;text-transform:uppercase;color:var(--text3);margin:4px 0 6px">Roteiro resumido</div>
+            <div class="roteiro" id="roteiro-lista"></div>
+          </div>
+        </div>
+
+        <!-- Detalhes da carga -->
+        <div class="form-section">
+          <div class="form-section-title">Detalhes da carga</div>
+          <div class="form-row">
+            <div class="field">
+              <label>Tipo de produto principal *</label>
+              <select id="s-tipo">
+                <option value="">Selecione...</option>
+                <option>Peças</option>
+                <option>Insumos</option>
+                <option>Ferramentas</option>
+                <option>EPIs</option>
+                <option>Vestuário</option>
+                <option>Infraestrutura</option>
+                <option>Máquinas</option>
+                <option>Outros</option>
+              </select>
+            </div>
+            <div class="field">
+              <label>Data ideal de coleta *</label>
+              <input type="date" id="s-data">
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="field"><label>Peso total estimado (kg)</label><input type="number" id="s-peso" placeholder="ex: 500"></div>
+            <div class="field"><label>Dimensões (C×L×A cm)</label><input type="text" id="s-dimensoes" placeholder="ex: 120×80×60"></div>
+          </div>
+          <div class="field"><label>Observações</label><textarea id="s-obs" rows="2" placeholder="Cuidados especiais, informações adicionais..."></textarea></div>
+        </div>
+
+        <!-- Foto da carga (geral) -->
+        <div class="form-section">
+          <div class="form-section-title">Foto da carga <span style="font-weight:400;text-transform:none;letter-spacing:0;font-size:11px;color:var(--text3)">(opcional — ajuda o transportador a dimensionar o veículo)</span></div>
+          <div class="upload-area" onclick="document.getElementById('file-foto').click()" ondragover="handleDrag(event,'foto')" ondrop="handleDrop(event,'foto')" id="ua-foto">
+            <span style="font-size:20px">📷</span>
+            <p>Foto da carga — clique ou arraste<br><small style="color:var(--text3)">JPG ou PNG</small></p>
+          </div>
+          <input type="file" id="file-foto" style="display:none" accept=".jpg,.jpeg,.png" onchange="handleFile(event,'foto')">
+          <div id="file-foto-preview"></div>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer" id="modal-sol-footer" style="display:none">
+      <button class="btn-secondary" onclick="closeModal('modal-solicitar')">Cancelar</button>
+      <button class="btn-accent" id="modal-sol-btn" onclick="submitSolicitacao()">Enviar solicitação</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: DETALHES -->
+<div class="modal-overlay" id="modal-detalhe">
+  <div class="modal">
+    <div class="modal-head">
+      <div class="modal-title" id="modal-det-title">Detalhes</div>
+      <button class="modal-close" onclick="closeModal('modal-detalhe')">✕</button>
+    </div>
+    <div class="modal-body" id="modal-det-body"></div>
+    <div class="modal-footer" id="modal-det-footer"></div>
+  </div>
+</div>
+
+<!-- MODAL: DAR LANCE (transportador) -->
+<div class="modal-overlay" id="modal-lance">
+  <div class="modal narrow">
+    <div class="modal-head">
+      <div class="modal-title">Fazer proposta</div>
+      <button class="modal-close" onclick="closeModal('modal-lance')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div id="lance-frete-resumo" style="padding:12px;background:var(--bg3);border-radius:8px;margin-bottom:16px;font-size:13px;color:var(--text2)"></div>
+      <div class="field"><label>Valor proposto (R$) *</label><input type="number" id="lance-valor" placeholder="0,00"></div>
+      <div class="field"><label>Prazo de entrega *</label><input type="date" id="lance-prazo"></div>
+      <div class="field"><label>Observações / condições</label><textarea id="lance-obs" rows="3" placeholder="Informações sobre sua proposta..."></textarea></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-secondary" onclick="closeModal('modal-lance')">Cancelar</button>
+      <button class="btn-accent" onclick="submitLance()">Enviar proposta</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: LANÇAR ENTREGA (transportador) -->
+<div class="modal-overlay" id="modal-entrega">
+  <div class="modal narrow">
+    <div class="modal-head">
+      <div class="modal-title">Confirmar entrega</div>
+      <button class="modal-close" onclick="closeModal('modal-entrega')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="field"><label>Data de entrega realizada</label><input type="date" id="ent-data"></div>
+      <div class="field"><label>Forma de pagamento</label>
+        <select id="ent-forma"><option>PIX</option><option>Transferência bancária</option><option>Boleto</option><option>Dinheiro</option></select>
+      </div>
+      <div class="field"><label>Chave PIX / Dados bancários</label><input type="text" id="ent-chave"></div>
+      <div class="field"><label>Observações de entrega</label><textarea id="ent-obs" rows="2" placeholder="Receptor, ocorrências..."></textarea></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-secondary" onclick="closeModal('modal-entrega')">Cancelar</button>
+      <button class="btn-accent" onclick="confirmarEntrega()">Marcar como entregue</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: CADASTRAR TRANSPORTADOR -->
+<div class="modal-overlay" id="modal-transp-cad">
+  <div class="modal narrow">
+    <div class="modal-head">
+      <div class="modal-title">Cadastrar transportador</div>
+      <button class="modal-close" onclick="closeModal('modal-transp-cad')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-row">
+        <div class="field"><label>Nome / Razão social *</label><input type="text" id="tc-nome"></div>
+        <div class="field"><label>Tipo</label><select id="tc-tipo"><option>Autônomo</option><option>Transportadora</option></select></div>
+      </div>
+      <div class="form-row">
+        <div class="field"><label>CPF / CNPJ</label><input type="text" id="tc-doc"></div>
+        <div class="field"><label>Telefone</label><input type="text" id="tc-tel"></div>
+      </div>
+      <div class="field"><label>E-mail (acesso à plataforma) *</label><input type="email" id="tc-email"></div>
+      <div class="field"><label>Senha inicial *</label><input type="password" id="tc-pass"></div>
+      <div class="field">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+          <label style="margin:0">Estados atendidos</label>
+          <button type="button" onclick="toggleTodosEstados('tc-estados')" style="font-size:11px;color:var(--accent);cursor:pointer;padding:2px 8px;border:1px solid rgba(0,177,49,.3);border-radius:4px;background:var(--accent-dim2)">Selecionar todos</button>
+        </div>
+        <div id="tc-estados" class="estados-grid"></div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-secondary" onclick="closeModal('modal-transp-cad')">Cancelar</button>
+      <button class="btn-accent" onclick="cadastrarTransportador()">Cadastrar</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: REGRA DE ALOCAÇÃO -->
+<div class="modal-overlay" id="modal-regra">
+  <div class="modal narrow">
+    <div class="modal-head">
+      <div class="modal-title">Nova regra de alocação</div>
+      <button class="modal-close" onclick="closeModal('modal-regra')">✕</button>
+    </div>
+    <div class="modal-body">
+      <p style="font-size:13px;color:var(--text2);margin-bottom:16px">Quando um frete se enquadrar nessas condições, o transportador será atribuído automaticamente sem precisar de lances.</p>
+      <div class="field">
+        <label>Tipo de produto</label>
+        <select id="rg-tipo">
+          <option value="">Qualquer tipo</option>
+          <option>Peças</option>
+          <option>Insumos</option>
+          <option>Ferramentas</option>
+          <option>EPIs</option>
+          <option>Vestuário</option>
+          <option>Infraestrutura</option>
+          <option>Máquinas</option>
+          <option>Outros</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Perfil da carga</label>
+        <select id="rg-perfil">
+          <option value="">Qualquer perfil</option>
+          <option value="envelope">Envelope / Documento</option>
+          <option value="caixa">Caixa pequena</option>
+          <option value="volumes">Volumes / Caixas</option>
+          <option value="pallet">Pallet / Carga pesada</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Transportador atribuído automaticamente *</label>
+        <select id="rg-transp"></select>
+      </div>
+      <div class="field"><label>Descrição da regra</label><input type="text" id="rg-desc" placeholder="ex: Eletrônicos SP → Transportes Rápido"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-secondary" onclick="closeModal('modal-regra')">Cancelar</button>
+      <button class="btn-accent" onclick="salvarRegra()">Salvar regra</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ===================== FILIAIS =====================
+const FILIAIS = [
+  {nome:'Mottu Várzea Grande',endereco:'Avenida Alzira Santana, 2310, Ikaray',cep:'78130-377',cidade:'Várzea Grande',tipo:'Filial'},
+  {nome:'Mottu Natal',endereco:'Rua Alvorada, 884, Igapó',cep:'59104-210',cidade:'Natal',tipo:'Filial'},
+  {nome:'Mottu Patos',endereco:'Rua Peregrino de Carvalho, 528, Centro',cep:'58700-160',cidade:'Patos',tipo:'Filial'},
+  {nome:'Mottu Campina Grande',endereco:'R. Maj. Belmiro, 200, São José',cep:'58400-342',cidade:'Campina Grande',tipo:'Filial'},
+  {nome:'Mottu Passo Fundo',endereco:'Avenida Fidêncio Franciosi, 225, Centro',cep:'99010-590',cidade:'Passo Fundo',tipo:'Filial'},
+  {nome:'Mottu Cachoeiro de Itapemirim',endereco:'Avenida Jones dos Santos Neves, 204, Maria Ortiz',cep:'29301-455',cidade:'Cachoeiro de Itapemirim',tipo:'Filial'},
+  {nome:'Mottu Chapecó',endereco:'Rua Quatorze de Agosto - D, 1040, Santa Maria',cep:'89812-310',cidade:'Chapecó',tipo:'Filial'},
+  {nome:'Mottu Jaboatão dos Guararapes',endereco:'Avenida Presidente Castelo Branco, 8170, Barra de Jangada',cep:'54460-025',cidade:'Jaboatão dos Guararapes',tipo:'Filial'},
+  {nome:'Mottu Itumbiara',endereco:'Avenida Afonso Pena, 363, Centro',cep:'75503-380',cidade:'Itumbiara',tipo:'Filial'},
+  {nome:'Mottu Marília',endereco:'Rua Coronel Galdino de Almeida, 509, Centro',cep:'17500-100',cidade:'Marília',tipo:'Filial'},
+  {nome:'Mottu São Mateus',endereco:'Rua Pastor Adarcy de Oliveira, 200, Cidade São Mateus',cep:'03950-015',cidade:'São Paulo',tipo:'Filial'},
+  {nome:'Mottu Botucatu',endereco:'Rua Emílio Cani, 1041, Vila Santa Therezinha de Menino Jesus',cep:'18606-730',cidade:'Botucatu',tipo:'Filial'},
+  {nome:'Mottu Americana',endereco:'Rua Iacanga, 1035, Vila Molon',cep:'13468-590',cidade:'Americana',tipo:'Filial'},
+  {nome:'Mottu Varginha',endereco:'Avenida Otávio Marques de Paiva, 1345, Vila Bueno',cep:'37006-571',cidade:'Varginha',tipo:'Filial'},
+  {nome:'Mottu Pouso Alegre',endereco:'Avenida Vereador Antônio da Costa Rios, 581, São Geraldo',cep:'37558-000',cidade:'Pouso Alegre',tipo:'Filial'},
+  {nome:'Mottu Imperatriz',endereco:'Av. Tropical Sul, 22, Jardim Tropical',cep:'65910-690',cidade:'Imperatriz',tipo:'Filial'},
+  {nome:'Mottu Uberaba',endereco:'Av. Nelson Freire, 414, Leblon',cep:'38030-000',cidade:'Uberaba',tipo:'Filial'},
+  {nome:'Mottu Bayeux',endereco:'Avenida Liberdade, 2455, Sesi',cep:'58111-400',cidade:'Bayeux',tipo:'Filial'},
+  {nome:'Mottu Palmas',endereco:'ACSO 91, Alameda 19, Qd. 15, Lt. 07, Plano Diretor Sul',cep:'77017-278',cidade:'Palmas',tipo:'Filial'},
+  {nome:'Mottu Goiânia',endereco:'Rua FL42, 132, Qd 04, Jardim das Acácias',cep:'74595-240',cidade:'Goiânia',tipo:'Filial'},
+  {nome:'Mottu Manaus',endereco:'Rua Visconde de Sinimbu, 18, (Parque das laranjeiras), Flores',cep:'69058-790',cidade:'Manaus',tipo:'Filial'},
+  {nome:'Mottu Macapá',endereco:'Rua Leopoldo Machado, 4304, Beirol',cep:'68902-020',cidade:'Macapá',tipo:'Filial'},
+  {nome:'Mottu Santa Maria',endereco:'Rua Appel, 1831, Nossa Senhora de Fátima',cep:'97015-030',cidade:'Santa Maria',tipo:'Filial'},
+  {nome:'Mottu CD-SC',endereco:'Alameda Ida Werstab, Nº 230, Bairro Limeira Baixa, Brusque, SC',cep:'88356-036',cidade:'Brusque',tipo:'CD'},
+  {nome:'Mottu Teresina',endereco:'Rua Eurípedes de Aguiar, 899, São Pedro',cep:'64019-380',cidade:'Teresina',tipo:'Filial'},
+  {nome:'Mottu Vila Leopoldina',endereco:'Rua Major Paladino, 275, Vila Ribeiro de Barros',cep:'05307-000',cidade:'São Paulo',tipo:'Filial'},
+  {nome:'Mottu Patos de Minas',endereco:'Avenida Fátima Porto, 2835, Centro',cep:'38700-004',cidade:'Patos de Minas',tipo:'Filial'},
+  {nome:'Mottu Sete Lagoas',endereco:'Rua Equador, 756, Progresso',cep:'35701-125',cidade:'Sete Lagoas',tipo:'Filial'},
+  {nome:'Mottu Contagem',endereco:'Av. César Augusto Faria Simões, 65, Jardim Riacho das Pedras',cep:'32242-190',cidade:'Contagem',tipo:'Filial'},
+  {nome:'Mottu Poços de Caldas',endereco:'Avenida João Pinheiro, 3123, Centro',cep:'37701-387',cidade:'Poços de Caldas',tipo:'Filial'},
+  {nome:'Mottu Belo Horizonte',endereco:'R. José Benedito Antão, 200, Nova Esperança',cep:'31250-115',cidade:'Belo Horizonte',tipo:'Filial'},
+  {nome:'Mottu Divinópolis',endereco:'RUA GOIAS, 72, Centro',cep:'35500-001',cidade:'Divinópolis',tipo:'Filial'},
+  {nome:'Mottu Montes Claros',endereco:'R. João Alves Coutinho, 43, Edgar Pereira',cep:'39400-157',cidade:'Montes Claros',tipo:'Filial'},
+  {nome:'Mottu Interlagos',endereco:'R. Antônio Mariano, 351, Interlagos',cep:'04784-000',cidade:'São Paulo',tipo:'Filial'},
+  {nome:'Mottu Mossoró',endereco:'Estrada do Contôrno, 1140, Nova Betânia',cep:'59603-480',cidade:'Mossoró',tipo:'Filial'},
+  {nome:'Mottu Arapiraca',endereco:'R. Gov. Silvestre Péricles, 375, Brasília',cep:'57313-390',cidade:'Arapiraca',tipo:'Filial'},
+  {nome:'Mottu Lagarto',endereco:'Rodovia Antônio Martins de Menezes, 285, Horta',cep:'49400-000',cidade:'Lagarto',tipo:'Filial'},
+  {nome:'Mottu Nossa Senhora do Socorro',endereco:'Avenida Moacir Oliveira, 724, Marcos Freire I',cep:'49155-970',cidade:'Nossa Senhora do Socorro',tipo:'Filial'},
+  {nome:'Mottu São José de Ribamar',endereco:'MA-201, 1, QD 02, 1, QD 02, Ubatuba',cep:'65110-000',cidade:'São José do Ribamar',tipo:'Filial'},
+  {nome:'Mottu Fátima',endereco:'Rua 48, 1000, Fátima',cep:'65032-000',cidade:'São Luis',tipo:'Filial'},
+  {nome:'Mottu Marabá',endereco:'Folha 18, Quadra 03, Lote 35, Nova Marabá',cep:'68506-410',cidade:'Marabá',tipo:'Filial'},
+  {nome:'Mottu São Luís',endereco:'Rua 17, 43, Quadra 43, Lotes 12 e 14, Jardim São Cristóvão II',cep:'65010-120',cidade:'São Luís',tipo:'Filial'},
+  {nome:'Mottu CD-PE',endereco:'Rua da republica eslovaca, 443, Condomínio Armazenna 3 Modulo A, Muribeca',cep:'54350-195',cidade:'Jaboatão dos Guararapes',tipo:'CD'},
+  {nome:'Mottu Parauapebas',endereco:'Rua Apinaje, S/N, Quadra: 51 Lote: 09 e 10, Parque dos Carajás',cep:'68515-000',cidade:'Parauapebas',tipo:'Filial'},
+  {nome:'Mottu Campo Grande',endereco:'Rua 19 de Novembro, 1177, Jardim Belo Horizonte',cep:'79041-640',cidade:'Campo Grande',tipo:'Filial'},
+  {nome:'Mottu Juazeiro',endereco:'Rodovia Estadual BA 210, nº 01A, Distrito Industrial do São Francisco',cep:'48903-440',cidade:'Juazeiro',tipo:'Filial'},
+  {nome:'Mottu Petrolina',endereco:'Avenida da Integração, 1533, Maria Auxiliadora',cep:'56330-290',cidade:'Petrolina',tipo:'Filial'},
+  {nome:'Mottu Crato',endereco:'Avenida Padre Cícero, 1756-B, São Miguel',cep:'63122-440',cidade:'Crato',tipo:'Filial'},
+  {nome:'Mottu Juazeiro do Norte',endereco:'R. Maria Diva de Carvalho, 1410, Triângulo',cep:'63040-830',cidade:'Juazeiro do Norte',tipo:'Filial'},
+  {nome:'Mottu Caxias',endereco:'Rua Nossa Senhora de Fátima, 1665, Centro',cep:'65600-560',cidade:'Caxias',tipo:'Filial'},
+  {nome:'Mottu Piçarreira',endereco:'Rua Raul Serrano, 4574, Piçarreira',cep:'64055-430',cidade:'Teresina',tipo:'Filial'},
+  {nome:'Mottu Ribeirão Preto',endereco:'Av. Mogiana, 712, Vila Mariana',cep:'14075-260',cidade:'Ribeirão Preto',tipo:'Filial'},
+  {nome:'Mottu Votuporanga',endereco:'Avenida Onofre de Paula, 1787, Jardim dos Pinheiros',cep:'15505-243',cidade:'Votuporanga',tipo:'Filial'},
+  {nome:'Mottu Porto Alegre',endereco:'Av. Assis Brasil, 4825, São Sebastião',cep:'91110-001',cidade:'Porto Alegre',tipo:'Filial'},
+  {nome:'Mottu Taboão',endereco:'Rua Roberta Simões Souza, 1440, Jardim Monte Alegre',cep:'06756-015',cidade:'Taboão da Serra',tipo:'Filial'},
+  {nome:'Mottu Franca',endereco:'Rua José Comparini, 973, Vila Rezende',cep:'14406-525',cidade:'Franca',tipo:'Filial'},
+  {nome:'Mottu Parnaíba',endereco:'Av Dr João Silva Filho, 3295, Bairro Piauí',cep:'64200-000',cidade:'Parnaíba',tipo:'Filial'},
+  {nome:'Mottu Sobral',endereco:'Rua Raimundo Edmundo Marques, 362, Dom Expedito',cep:'62050-125',cidade:'Sobral',tipo:'Filial'},
+  {nome:'Mottu Aracati',endereco:'Rua coronel Pompeu, 1000, Centro',cep:'62810-000',cidade:'Aracati',tipo:'Filial'},
+  {nome:'Mottu Messejana',endereco:'Rua José Hipólito, 1539, Messejana',cep:'60871-170',cidade:'Fortaleza',tipo:'Filial'},
+  {nome:'Mottu Fortaleza',endereco:'Rua Dr. Ratisbona, 738, Fátima',cep:'60411-220',cidade:'Fortaleza',tipo:'Filial'},
+  {nome:'Mottu Caucaia',endereco:'Avenida Dom Almeida Lustosa, 1063, Parque Albano (Jurema)',cep:'61645-000',cidade:'Caucaia',tipo:'Filial'},
+  {nome:'Mottu João Pessoa',endereco:'R. Ernestina Silvério de Oliveira, 220, Cidade dos Colibris',cep:'58073-176',cidade:'João Pessoa',tipo:'Filial'},
+  {nome:'Mottu Itapipoca',endereco:'R. João Cordeiro, 222, Coqueiro',cep:'62500-000',cidade:'Itapipoca',tipo:'Filial'},
+  {nome:'Mottu Maracanaú',endereco:'Av. Dr. Mendel Steinbruch, 7203, Parangaba',cep:'60766-565',cidade:'Maracanaú',tipo:'Filial'},
+  {nome:'Mottu Parnamirim',endereco:'Rua SubOficial Farias, 247, Monte Castelo',cep:'59146-210',cidade:'Parnamirim',tipo:'Filial'},
+  {nome:'Mottu Ipiranga',endereco:'Av. Presidente Wilson, 5897, Vila Independência',cep:'04220-002',cidade:'São Paulo',tipo:'Filial'},
+  {nome:'Mottu Campinas',endereco:'R. Maria Bibiana do Carmo, 208, Parque Industrial',cep:'13031-720',cidade:'Campinas',tipo:'Filial'},
+  {nome:'Mottu Olinda',endereco:'Rua Carlos Pena Filho, 254, Casa Caiada',cep:'53250-430',cidade:'Olinda',tipo:'Filial'},
+  {nome:'Mottu Ipojuca',endereco:'Estr. Pará Usina Salgado, 15, Nossa Senhora do Ó',cep:'55592-000',cidade:'Ipojuca',tipo:'Filial'},
+  {nome:'Mottu Pindamonhangaba',endereco:'Rua Major José dos Santos Moreira, 1076, Vila Bourghese',cep:'12410-050',cidade:'Pindamonhangaba',tipo:'Filial'},
+  {nome:'Mottu Bragança',endereco:'Avenida Governador Mendonça Furtado, 203, Vila Nova',cep:'68600-000',cidade:'Bragança',tipo:'Filial'},
+  {nome:'Mottu Limão - Zona Norte',endereco:'Avenida Professor Celestino Bourroul, 363, Limão',cep:'02710-000',cidade:'São Paulo',tipo:'Filial'},
+  {nome:'Mottu Jundiaí',endereco:'Rua Graff, 186, Vila Graff',cep:'13215-030',cidade:'Jundiaí',tipo:'Filial'},
+  {nome:'Mottu Governador Valadares',endereco:'Rua Mathias Lobato, 35, Cidade Nova',cep:'35010-150',cidade:'Governador Valadares',tipo:'Filial'},
+  {nome:'Mottu Cabo Frio',endereco:'Avenida Joaquim Nogueira, 1502, São Cristóvão',cep:'28909-490',cidade:'Cabo Frio',tipo:'Filial'},
+  {nome:'Mottu Serra',endereco:'Rua Nelcy Lopes Vieira, 1170, Jardim Limoeiro',cep:'29164-018',cidade:'Serra',tipo:'Filial'},
+  {nome:'Mottu Ipatinga',endereco:'Rua Judite, 350, Canaã',cep:'35164-182',cidade:'Ipatinga',tipo:'Filial'},
+  {nome:'Mottu Colatina',endereco:'Avenida Jonas Simonassi, 568, Maria das Graças',cep:'29705-171',cidade:'Colatina',tipo:'Filial'},
+  {nome:'Mottu Vila Velha',endereco:'R. Rosa de Prata, 684, Polo Empresarial Novo México',cep:'29104-366',cidade:'Vila Velha',tipo:'Filial'},
+  {nome:'Mottu Macaé',endereco:'Avenida Rui Barbosa, 1260, Loja B, Centro',cep:'27910-362',cidade:'Macaé',tipo:'Filial'},
+  {nome:'Mottu Cariacica',endereco:'Rua Rio Jordão, 7, Vila Palestina',cep:'29145-690',cidade:'Cariacica',tipo:'Filial'},
+  {nome:'Mottu Linhares',endereco:'Av. Quintino Bocaiúva, 1114, Interlagos',cep:'29903-450',cidade:'Linhares',tipo:'Filial'},
+  {nome:'Mottu Campos dos Goytacazes',endereco:'Av. 24 de Outubro, 27, PRQ. Tarcísio Miranda',cep:'28030-111',cidade:'Campos dos Goytacazes',tipo:'Filial'},
+  {nome:'Mottu Vitória',endereco:'Rua Antônio Aleixo, 665, Consolação',cep:'29045-660',cidade:'Vitória',tipo:'Filial'},
+  {nome:'Mottu Guarulhos',endereco:'Rua Antônio Pegoraro, 110, Cocaia',cep:'07131-403',cidade:'Guarulhos',tipo:'Filial'},
+  {nome:'Mottu Mogi das Cruzes',endereco:'Av. Lourenço de Souza Franco, 1479 e 1489, Jundiapeba',cep:'08750-560',cidade:'Mogi das Cruzes',tipo:'Filial'},
+  {nome:'Mottu São José dos Campos',endereco:'R. Madagascar, 277, Jardim America',cep:'12235-450',cidade:'São José dos Campos',tipo:'Filial'},
+  {nome:'Mottu Sorocaba',endereco:'Av. Três de Março, 1835, Aparecidinha',cep:'18087-180',cidade:'Sorocaba',tipo:'Filial'},
+  {nome:'Mottu São José do Rio Preto',endereco:'Rua Reverendo Vidal, 635, Jardim Alto Rio Preto',cep:'15020-220',cidade:'São José do Rio Preto',tipo:'Filial'},
+  {nome:'Mottu Vila Isabel',endereco:'Rua Visconde de Santa Isabel, 167, Vila Isabel',cep:'20560-120',cidade:'Rio de Janeiro',tipo:'Filial'},
+  {nome:'Mottu Niterói',endereco:'Alameda São Boaventura, 460, loja 102, Fonseca',cep:'24120-191',cidade:'Niterói',tipo:'Filial'},
+  {nome:'Mottu Nova Iguaçu',endereco:'Rua Carlos Marques Rollo, 610, Vila Nova',cep:'26225-290',cidade:'Nova Iguaçu',tipo:'Filial'},
+  {nome:'Mottu Salvador',endereco:'R. Dr. Altíno Teixeira, 272, Porto Seco Pirajá',cep:'41233-010',cidade:'Salvador',tipo:'Filial'},
+  {nome:'Mottu Camaçari',endereco:'Rua da Bandeira, 173, Centro',cep:'42800-029',cidade:'Camaçari',tipo:'Filial'},
+  {nome:'Mottu Ourinhos',endereco:'Rua Pedro Migliari, 816, Jardim Furlan',cep:'19902-040',cidade:'Ourinhos',tipo:'Filial'},
+  {nome:'Mottu Belém',endereco:'Av. Dr. Freitas, 764, Pedreira',cep:'66087-810',cidade:'Belém',tipo:'Filial'},
+  {nome:'Mottu Avaré',endereco:'Rua Santos Dumont, 2420, Parque Residencial Brabância I',cep:'18703-000',cidade:'Avaré',tipo:'Filial'},
+  {nome:'Mottu São Miguel',endereco:'R. Humberto Parente, 180, Vila Pedroso',cep:'08070-450',cidade:'São Paulo',tipo:'Filial'},
+  {nome:'Mottu Lages',endereco:'Avenida Presidente Vargas, 1446, Coral',cep:'88509-501',cidade:'Lages',tipo:'Filial'},
+  {nome:'Mottu Foz do Iguaçu',endereco:'Rua Espanha, 848, Portes',cep:'85865-110',cidade:'Foz do Iguaçu',tipo:'Filial'},
+  {nome:'Mottu Toledo',endereco:'Rua Jurandir dal\'Pra, 14, Vila Becker',cep:'85902-530',cidade:'Toledo',tipo:'Filial'},
+  {nome:'Mottu Dourados',endereco:'Rua Palmeiras, 396, Jardim São Pedro',cep:'79810-020',cidade:'Dourados',tipo:'Filial'},
+  {nome:'Mottu Curitiba',endereco:'R. São Bento, 1069, Hauer',cep:'81630-230',cidade:'Curitiba',tipo:'Filial'},
+  {nome:'Mottu Londrina',endereco:'Rua Amaro Romeu Ramalho, 56, Jardim Helena',cep:'86027-500',cidade:'Londrina',tipo:'Filial'},
+  {nome:'Mottu Ponta Grossa',endereco:'Rua Nicolau Kluppel Neto, 272, Contorno',cep:'84061-000',cidade:'Ponta Grossa',tipo:'Filial'},
+  {nome:'Mottu Blumenau',endereco:'Rua São Paulo, 3150, Itoupava Seca',cep:'89030-000',cidade:'Blumenau',tipo:'Filial'},
+  {nome:'Mottu Araçatuba',endereco:'Rua Manoel da Silva, 68, Jussara',cep:'16021-330',cidade:'Araçatuba',tipo:'Filial'},
+  {nome:'Mottu Presidente Prudente',endereco:'Avenida Brasil, 1818, Vila Mirian',cep:'19013-000',cidade:'Presidente Prudente',tipo:'Filial'},
+  {nome:'Mottu Paranaguá',endereco:'Alameda Coronel Elysio Pereira, 380, Estradinha',cep:'83206-000',cidade:'Paranaguá',tipo:'Filial'},
+  {nome:'Mottu Maringá',endereco:'R. Estados Unidos, 2163, Vila Nova',cep:'87045-010',cidade:'Maringá',tipo:'Filial'},
+  {nome:'Mottu Joinville',endereco:'Rua Graciosa, 1431, Guanabara',cep:'89207-100',cidade:'Joinville',tipo:'Filial'},
+  {nome:'Mottu Itajaí',endereco:'Rua José Pereira Liberato, 2417, São Judas',cep:'88303-401',cidade:'Itajaí',tipo:'Filial'},
+  {nome:'Mottu Cascavel',endereco:'Rua Erechim, 359, Região do Lago',cep:'85812-255',cidade:'Cascavel',tipo:'Filial'},
+  {nome:'Mottu Rio Branco',endereco:'Rodovia AC 40, 261, A, Loteamento Santa Helena',cep:'69908-732',cidade:'Rio Branco',tipo:'Filial'},
+  {nome:'Mottu Recife',endereco:'Rua Madrid, 444, Imbiribeira',cep:'51180-020',cidade:'Recife',tipo:'Filial'},
+  {nome:'Mottu Uberlândia',endereco:'Avenida Floriano Peixoto, 3829, Brasil',cep:'38400-704',cidade:'Uberlândia',tipo:'Filial'},
+  {nome:'Mottu Aracaju',endereco:'R. São Cristóvão - Getúlio Vargas, 1835, Getúlio Vargas',cep:'49140-354',cidade:'Aracaju',tipo:'Filial'},
+  {nome:'Mottu Maceió',endereco:'R. Eduardo Pinheiro Lobo, 213, Quadra 31, Lote 6, Tabuleiro dos Martins',cep:'57061-110',cidade:'Maceió',tipo:'Filial'},
+  {nome:'Mottu Alagoinhas',endereco:'Avenida São Francisco de Assis, 386, lotes 26,27 e 28, loteamento 41, quadra 16, Jardim Petrolar',cep:'48005-492',cidade:'Alagoinhas',tipo:'Filial'},
+  {nome:'Mottu Feira de Santana',endereco:'Av. Eduardo Fróes da Mota, 109, Sobradinho',cep:'44021-215',cidade:'Feira de Santana',tipo:'Filial'},
+  {nome:'Mottu Itabuna',endereco:'Av Manoel Chaves, 525, Jaçanã',cep:'45606-401',cidade:'Itabuna',tipo:'Filial'},
+  {nome:'Mottu Vitória da Conquista',endereco:'Avenida Pércia, 196, Jurema',cep:'45023-260',cidade:'Vitória da Conquista',tipo:'Filial'},
+  {nome:'Mottu Teixeira de Freitas',endereco:'Avenida das Nações, 127, Monte Castelo',cep:'45990-090',cidade:'Teixeira de Freitas',tipo:'Filial'},
+  {nome:'Mottu Porto Seguro',endereco:'Avenida dos Trabalhadores, 1703, Olhos d\'água',cep:'45810-000',cidade:'Porto Seguro',tipo:'Filial'},
+  {nome:'Mottu Eunápolis',endereco:'Avenida Dom Pedro II, 793, Centro',cep:'45820-080',cidade:'Eunápolis',tipo:'Filial'},
+  {nome:'Mottu Jequié',endereco:'Rua Antônio de Jesus Pereira, 194, Pompílio Sampaio',cep:'45206-057',cidade:'Jequié',tipo:'Filial'},
+  {nome:'Mottu Santos',endereco:'Avenida Conselheiro Rodrigues Alves, 250, Macuco',cep:'11015-200',cidade:'Santos',tipo:'Filial'},
+  {nome:'Mottu Rondonópolis',endereco:'Rua 19 de Novembro, 1177, Jardim Belo Horizonte',cep:'78705-506',cidade:'Rondonópolis',tipo:'Filial'},
+  {nome:'Mottu Madureira',endereco:'Estrada Intendente Magalhães, 183, Madureira',cep:'21341-331',cidade:'Rio de Janeiro',tipo:'Filial'},
+  {nome:'Mottu Ji Paraná',endereco:'Rua Curitiba, 30, Nova Brasília',cep:'76908-360',cidade:'Ji-Paraná',tipo:'Filial'},
+  {nome:'Mottu Criciúma',endereco:'Av. das Indústrias, 100, Nossa Sra. da Salete',cep:'88815-526',cidade:'Criciúma',tipo:'Filial'},
+  {nome:'Mottu Pelotas',endereco:'Rua Coronel Alberto Rosa, 376, Centro',cep:'96010-770',cidade:'Pelotas',tipo:'Filial'},
+  {nome:'Mottu Caxias do Sul',endereco:'Rua João Costamilan, 195, Nossa Sra. de Lourdes',cep:'95074-460',cidade:'Caxias do Sul',tipo:'Filial'},
+  {nome:'Mottu Florianópolis',endereco:'R. Waldemar Ouríques, 664, Capoeiras',cep:'88090-051',cidade:'Florianópolis',tipo:'Filial'},
+  {nome:'Mottu Ananindeua',endereco:'Estr do Maguari, 55, Centro',cep:'67000-000',cidade:'Ananindeua',tipo:'Filial'},
+  {nome:'Mottu Jandira',endereco:'Rua Marcelino da Silva, 142, Núcleo Micro Industrial Pres. Wilson',cep:'06602-030',cidade:'Jandira',tipo:'Filial'},
+  {nome:'Mottu Anápolis',endereco:'Av. Independência, Qd. 08, Lt. 08, Lourdes',cep:'75095-655',cidade:'Anápolis',tipo:'Filial'},
+  {nome:'Mottu São Bernardo',endereco:'Av. Moinho Fabrini, 128, Independência',cep:'09861-160',cidade:'São Bernardo do Campo',tipo:'Filial'},
+  {nome:'Mottu Porto Velho',endereco:'Avenida Amazonas, 8647, Bairro Escola de Polícia',cep:'78916-720',cidade:'Porto Velho',tipo:'Filial'},
+  {nome:'Mottu Itapetininga',endereco:'Rua Quintino Bocaiúva, 420, Centro',cep:'18200-014',cidade:'Itapetininga',tipo:'Filial'},
+  {nome:'Mottu Vitória de Santo Antão',endereco:'Avenida Henrique de Holanda, 2300, Alto José Leal',cep:'55608-001',cidade:'Vitória de Santo Antão',tipo:'Filial'},
+  {nome:'Mottu Valparaíso',endereco:'Lote 05 da área remanescente 02, s/n, Jardim Céu Azul',cep:'72871-145',cidade:'Valparaíso de Goiás',tipo:'Filial'},
+  {nome:'Mottu Duque de Caxias',endereco:'Avenida Perimetral Brigadeiro Lima e Silva, 1771, Jardim Vinte e Cinco de Agosto',cep:'25071-182',cidade:'Duque de Caxias',tipo:'Filial'},
+  {nome:'Mottu Caruaru',endereco:'Avenida Brasil, 941, Galpão B, Universitário',cep:'55016-360',cidade:'Caruaru',tipo:'Filial'},
+  {nome:'Mottu Praia Grande',endereco:'Avenida Ministro Marcos Freire, 6082, Vila Tupi',cep:'11717-260',cidade:'Praia Grande',tipo:'Filial'},
+  {nome:'Mottu Castanhal',endereco:'Avenida Barão do Rio Branco, 942, Nova Olinda',cep:'68740-000',cidade:'Castanhal',tipo:'Filial'},
+  {nome:'Mottu Icoaraci',endereco:'Rodovia Augusto Montenegro, 400, Parque Guajará (Icoaraci)',cep:'66821-300',cidade:'Belém',tipo:'Filial'},
+  {nome:'Mottu Abaetetuba',endereco:'TV PROF° ARMANDO COSTA BAIA, s/n, Cristo Redentor',cep:'68440-000',cidade:'Abaetetuba',tipo:'Filial'},
+  {nome:'Mottu Boa Vista',endereco:'Avenida Carlos Pereira de Melo, 2497, Jardim Floresta',cep:'69312-212',cidade:'Boa Vista',tipo:'Filial'},
+  {nome:'Mottu Bauru',endereco:'Rua João Baptista Garcia Filho, 234, Jardim Contorno',cep:'17047-245',cidade:'Bauru',tipo:'Filial'},
+  {nome:'Mottu Juiz de Fora',endereco:'AV. FRANCISCO VALADARES, 131 e 145, SALA 101 e SALA 201, Poço Rico',cep:'36020-420',cidade:'Juiz de Fora',tipo:'Filial'},
+  {nome:'Mottu Nova Friburgo',endereco:'Avenida Presidente Costa e Silva, 981, Centro',cep:'28630-000',cidade:'Nova Friburgo',tipo:'Filial'},
+  {nome:'Mottu Jacarepaguá',endereco:'Estrada dos Bandeirantes, 4815, Jacarepaguá',cep:'22775-113',cidade:'Rio de Janeiro',tipo:'Filial'},
+  {nome:'Mottu Campo Grande - RJ',endereco:'Estrada do Monteiro, 927, Campo Grande',cep:'23045-831',cidade:'Rio de Janeiro',tipo:'Filial'},
+  {nome:'Mottu Teresópolis',endereco:'Avenida Delfim Moreira, 1318, Várzea',cep:'25953-236',cidade:'Teresópolis',tipo:'Filial'},
+  {nome:'Mottu Itaboraí',endereco:'Avenida Vinte e Dois de Maio, 8200, Venda das Pedras',cep:'24804-703',cidade:'Itaboraí',tipo:'Filial'},
+  {nome:'Mottu Volta Redonda',endereco:'Via Almirante Adalberto Nunes, 3254, Vila Mury',cep:'27275-600',cidade:'Volta Redonda',tipo:'Filial'},
+  {nome:'Mottu Lapa - Mottu-e',endereco:'Rua Catão, 1343, Vila Romana',cep:'05049-000',cidade:'São Paulo',tipo:'Filial'},
+  {nome:'Mottu São Carlos',endereco:'Rua Professor Antônio Munhoz, 240/250, Jardim Maracanã',cep:'13571-320',cidade:'São Carlos',tipo:'Filial'},
+  {nome:'Mottu Santarém',endereco:'Tv. Maranhão, 300, Aeroporto Velho',cep:'68020-070',cidade:'Santarém',tipo:'Filial'},
+  {nome:'Mottu Rio Verde',endereco:'Avenida Sidor Ivanoff, Quadra BV-07 Lote 22/23, Residencial Bela Vista',cep:'75910-804',cidade:'Rio Verde',tipo:'Filial'},
+  {nome:'Mottu Barreiras',endereco:'Avenida Clériston Andrade, 2697, Rio Grande',cep:'47800-539',cidade:'Barreiras',tipo:'Filial'},
+  {nome:'Mottu Cuiabá',endereco:'R. Dr. Cássio Veiga de Sá, 107, Consil',cep:'78048-000',cidade:'Cuiabá',tipo:'Filial'},
+  {nome:'Mottu Aparecida de Goiânia',endereco:'Rua São Paulo, Quadra 012, Lote 16, Vila Nossa Senhora de Lourdes',cep:'74912-460',cidade:'Aparecida de Goiânia',tipo:'Filial'},
+  {nome:'Mottu Sinop',endereco:'Avenida das Águias, 1371, Jardim Califórnia',cep:'78554-136',cidade:'Sinop',tipo:'Filial'},
+  {nome:'Mottu Brasília',endereco:'St. Hab. Vicente Pires Rua 3 Lote 3, 86, Chácara 86, Lote 3, Taguatinga',cep:'72005-780',cidade:'Brasília',tipo:'Filial'},
+  {nome:'Mottu Piracicaba',endereco:'Av. Santa Rosa, 330, Areião',cep:'13414-038',cidade:'Piracicaba',tipo:'Filial'},
+  {nome:'Pit Stop - Taubaté',endereco:'Rua Viterbo Rodrigues Viana, 126, Loteamento Vila Neide',cep:'12040-300',cidade:'Taubaté',tipo:'Filial'},
+];
+
+// ===================== CONFIGURAÇÃO DA API =====================
+// Após configurar o Apps Script, cole a URL aqui:
+const API_URL = '';  // ex: 'https://script.google.com/macros/s/SEU_ID/exec'
+const MODO_DEMO = !API_URL; // true = dados locais, false = Google Sheets
+
+// ===================== CAMADA DE DADOS =====================
+// Todas as operações passam por aqui.
+// Em modo demo: usa DB local. Com API_URL: chama o Google Sheets.
+
+async function api(action, dados = {}) {
+  if (MODO_DEMO) return apiLocal(action, dados);
+  try {
+    showLoading(true);
+    const r = await fetch(API_URL, {
+      method: 'POST',
+      body: JSON.stringify({ action, ...dados })
+    });
+    const json = await r.json();
+    showLoading(false);
+    if (!json.ok && json.error) showToast('Erro: ' + json.error, 'error');
+    return json;
+  } catch (e) {
+    showLoading(false);
+    showToast('Sem conexão com o servidor', 'error');
+    return { ok: false, error: e.message };
+  }
+}
+
+// Upload de arquivo para o Drive
+async function uploadArquivo(file) {
+  if (MODO_DEMO) return { ok: true, fileId: 'demo-' + Date.now(), nome: file.name, url: '#' };
+  return new Promise((resolve) => {
+    const reader = new FileReader();
+    reader.onload = async (e) => {
+      const base64 = e.target.result.split(',')[1];
+      const r = await api('uploadArquivo', {
+        base64, fileName: file.name, mimeType: file.type
+      });
+      resolve(r);
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
+function showLoading(show) {
+  let el = document.getElementById('loading-bar');
+  if (!el) {
+    el = document.createElement('div');
+    el.id = 'loading-bar';
+    el.style.cssText = 'position:fixed;top:0;left:0;right:0;height:3px;background:var(--accent);z-index:9999;transition:opacity .3s;transform-origin:left';
+    document.body.appendChild(el);
+  }
+  el.style.opacity = show ? '1' : '0';
+}
+
+// ===================== DB LOCAL (modo demo) =====================
+const DB = {
+  users: [
+    {id:'u1',name:'Carlos Mendes',email:'gestor@empresa.com',pass:'123456',role:'gestor',setor:'Logística'},
+    {id:'u2',name:'João Silva',email:'joao@empresa.com',pass:'123456',role:'solicitante',setor:'Vendas',tel:'(11) 91111-1111'},
+    {id:'u3',name:'Maria Santos',email:'maria@empresa.com',pass:'123456',role:'solicitante',setor:'Operações',tel:'(11) 92222-2222'},
+    {id:'u4',name:'Transportes Rápido Ltda',email:'transportadora@frete.com',pass:'123456',role:'transportador',tipo:'Transportadora',doc:'12.345.678/0001-90',tel:'(11) 99999-1234',estados:['SP','MG','RJ','ES']},
+    {id:'u5',name:'Paulo Motorista',email:'paulo@frete.com',pass:'123456',role:'transportador',tipo:'Autônomo',doc:'123.456.789-00',tel:'(11) 98888-5678',estados:['CE','PE','BA']},
+  ],
+  fretes: [
+    {id:'f001',tipoFrete:'spot',solicitanteId:'u2',solicitanteNome:'João Silva',solicitanteEmail:'joao@empresa.com',
+      pontos:[
+        {tipo:'coleta',filial:'Mottu Interlagos',endereco:'R. Antônio Mariano, 351, Interlagos',cep:'04784-000',cidade:'São Paulo',descricao:'Caixas de eletrônicos',nfNome:'nf_001.pdf'},
+        {tipo:'entrega',filial:'Mottu Campinas',endereco:'R. Maria Bibiana do Carmo, 208, Parque Industrial',cep:'13031-720',cidade:'Campinas'}
+      ],
+      tipoProduto:'Peças',perfil:'volumes',peso:'200',dimensoes:'80×60×50',obs:'Frágil',
+      data:'2026-05-15',status:'done',transportadorId:'u4',transportadorNome:'Transportes Rápido Ltda',valor:'850',
+      createdAt:'2026-05-01',lances:[],
+      timeline:[{ev:'Solicitado',t:'01/05 09:15'},{ev:'Aprovado',t:'01/05 14:32'},{ev:'Em licitação',t:'02/05 08:00'},{ev:'Transportador escolhido',t:'02/05 10:00'},{ev:'Em trânsito',t:'15/05 07:30'},{ev:'Entregue',t:'17/05 16:45'}]},
+    {id:'f002',tipoFrete:'spot',solicitanteId:'u3',solicitanteNome:'Maria Santos',solicitanteEmail:'maria@empresa.com',
+      pontos:[
+        {tipo:'coleta',filial:'Mottu Belo Horizonte',endereco:'R. José Benedito Antão, 200, Nova Esperança',cep:'31250-115',cidade:'Belo Horizonte',descricao:'Vestuário uniformes',nfNome:'nf_002.pdf'},
+        {tipo:'entrega',filial:'Mottu Uberlândia',endereco:'Avenida Floriano Peixoto, 3829, Brasil',cep:'38400-704',cidade:'Uberlândia'}
+      ],
+      tipoProduto:'Vestuário',perfil:'pallet',peso:'450',dimensoes:'120×80×90',obs:'',
+      data:'2026-05-20',status:'bidding',transportadorId:null,transportadorNome:null,valor:null,
+      createdAt:'2026-04-28',
+      lances:[
+        {transportadorId:'u4',transportadorNome:'Transportes Rápido Ltda',valor:620,prazo:'2026-05-22',obs:'Caminhão baú disponível',criadoEm:'29/04 14:00'},
+        {transportadorId:'u5',transportadorNome:'Paulo Motorista',valor:540,prazo:'2026-05-24',obs:'Frete na carroceria coberta',criadoEm:'29/04 16:30'}
+      ],
+      timeline:[{ev:'Solicitado',t:'28/04 10:00'},{ev:'Aprovado',t:'29/04 09:15'},{ev:'Em licitação',t:'29/04 09:15'}]},
+    {id:'f003',tipoFrete:'spot',solicitanteId:'u2',solicitanteNome:'João Silva',solicitanteEmail:'joao@empresa.com',
+      pontos:[
+        {tipo:'coleta',filial:'Mottu Santos',endereco:'Avenida Conselheiro Rodrigues Alves, 250, Macuco',cep:'11015-200',cidade:'Santos',descricao:'Maquinário pesado',nfNome:'nf_003.pdf'},
+        {tipo:'coleta',filial:'Mottu Praia Grande',endereco:'Avenida Ministro Marcos Freire, 6082, Vila Tupi',cep:'11726-100',cidade:'Praia Grande',descricao:'Peças complementares',nfNome:'nf_003b.pdf'},
+        {tipo:'entrega',filial:'Mottu Sorocaba',endereco:'Av. Três de Março, 1835, Aparecidinha',cep:'18087-180',cidade:'Sorocaba'}
+      ],
+      tipoProduto:'Máquinas',perfil:'pallet',peso:'1200',dimensoes:'200×150×120',obs:'Equipamento pesado — caminhão baú obrigatório',
+      data:'2026-05-25',status:'approved',transportadorId:null,transportadorNome:null,valor:null,
+      createdAt:'2026-04-29',lances:[],
+      timeline:[{ev:'Solicitado',t:'29/04 14:00'},{ev:'Aprovado',t:'30/04 10:45'},{ev:'Em licitação',t:'30/04 10:45'}]},
+    {id:'f004',tipoFrete:'spot',solicitanteId:'u3',solicitanteNome:'Maria Santos',solicitanteEmail:'maria@empresa.com',
+      pontos:[
+        {tipo:'coleta',filial:'Mottu Fortaleza',endereco:'Rua Dr. Ratisbona, 738, Fátima',cep:'60411-220',cidade:'Fortaleza',descricao:'EPIs diversos',nfNome:'nf_004.pdf'},
+        {tipo:'entrega',filial:'Mottu Messejana',endereco:'Rua José Hipólito, 1539, Messejana',cep:'60871-170',cidade:'Fortaleza'}
+      ],
+      tipoProduto:'EPIs',perfil:'caixa',peso:'5',dimensoes:'30×20×15',obs:'',
+      data:'2026-05-30',status:'pending',transportadorId:null,transportadorNome:null,valor:null,
+      createdAt:'2026-04-30',lances:[],
+      timeline:[{ev:'Solicitado',t:'30/04 11:20'}]},
+  ],
+  regras: [
+    {id:'r1',tipo:'Peças',perfil:'pallet',transportadorId:'u4',transportadorNome:'Transportes Rápido Ltda',desc:'Peças em pallet → Transportes Rápido'},
+  ]
+};
+
+// ===================== API LOCAL (espelha o Sheets) =====================
+function apiLocal(action, d) {
+  switch(action) {
+    case 'login': {
+      const u = DB.users.find(u => u.email===d.email && u.pass===d.senha);
+      if (!u) return { ok:false, error:'E-mail ou senha incorretos' };
+      return { ok:true, user: { id:u.id, nome:u.name, email:u.email, role:u.role, setor:u.setor, tel:u.tel||'', tipo:u.tipo||'', doc:u.doc||'', estados:u.estados||[] } };
+    }
+    case 'register': {
+      if (DB.users.find(u=>u.email===d.email)) return { ok:false, error:'E-mail já cadastrado' };
+      const id='u'+Date.now();
+      DB.users.push({ id, name:d.nome, email:d.email, pass:d.senha, role:d.role||'solicitante', setor:d.setor||'', tipo:d.tipo||'', doc:d.doc||'', tel:d.tel||'', estados:d.estados||[] });
+      return { ok:true, id };
+    }
+    case 'criarFrete': {
+      const id='FRT-'+Date.now()+'-'+Math.random().toString(36).slice(2,6).toUpperCase();
+      const f={ id, tipoFrete:d.tipoFrete||'spot', solicitanteId:d.solicitanteId, solicitanteNome:d.solicitanteNome, solicitanteEmail:d.solicitanteEmail||'', pontos:d.pontos||[], hub:d.hub||'', hubEndereco:d.hubEndereco||'', hubCep:d.hubCep||'', hubCidade:d.hubCidade||'', destinos:d.destinos||[], tipoProduto:d.tipoProduto||'', perfil:d.perfil||'', peso:d.peso||'', dimensoes:d.dimensoes||'', obs:d.obs||'', fotoNome:d.fotoNome||'', fotoId:d.fotoId||'', data:d.data||'', status:d.status||'pending', transportadorId:null, transportadorNome:null, valor:null, motivoRecusa:null, createdAt:new Date().toISOString().slice(0,10), lances:[], timeline:[{ev:d.eventoInicial||'Solicitado',t:now()}] };
+      DB.fretes.push(f);
+      return { ok:true, id };
+    }
+    case 'listarFretes': {
+      let lista = DB.fretes;
+      if (d.role==='solicitante') lista = lista.filter(f=>f.solicitanteId===d.userId);
+      if (d.role==='transportador') lista = lista.filter(f=>f.transportadorId===d.userId||(f.status==='bidding'||f.status==='approved'));
+      return { ok:true, fretes: lista };
+    }
+    case 'atualizarFrete': {
+      const f = DB.fretes.find(x=>x.id===d.freteId);
+      if (!f) return { ok:false, error:'Frete não encontrado' };
+      if (d.status)            f.status=d.status;
+      if (d.motivoRecusa)      f.motivoRecusa=d.motivoRecusa;
+      if (d.transportadorId)   f.transportadorId=d.transportadorId;
+      if (d.transportadorNome) f.transportadorNome=d.transportadorNome;
+      if (d.valor!==undefined)  f.valor=d.valor;
+      if (d.dataEntrega)       f.dataEntrega=d.dataEntrega;
+      if (d.pagForma)          f.pagForma=d.pagForma;
+      if (d.pagChave)          f.pagChave=d.pagChave;
+      if (d.evento)            f.timeline.push({ev:d.evento, obs:d.eventoObs||'', t:now()});
+      return { ok:true };
+    }
+    case 'adicionarLance': {
+      const f = DB.fretes.find(x=>x.id===d.freteId);
+      if (!f) return { ok:false, error:'Frete não encontrado' };
+      f.lances = f.lances||[];
+      f.lances.push({ transportadorId:d.transportadorId, transportadorNome:d.transportadorNome, valor:parseFloat(d.valor), prazo:d.prazo, obs:d.obs||'', criadoEm:now() });
+      return { ok:true };
+    }
+    case 'listarTransportadores': {
+      const list = DB.users.filter(u=>u.role==='transportador').map(u=>({ id:u.id, nome:u.name, email:u.email, tipo:u.tipo||'', doc:u.doc||'', tel:u.tel||'', estados:u.estados||[] }));
+      return { ok:true, transportadores:list };
+    }
+    case 'cadastrarTransportador': {
+      if (DB.users.find(u=>u.email===d.email)) return { ok:false, error:'E-mail já cadastrado' };
+      const id='u'+Date.now();
+      DB.users.push({ id, name:d.nome, email:d.email, pass:d.senha, role:'transportador', tipo:d.tipo||'Autônomo', doc:d.doc||'', tel:d.tel||'', estados:d.estados||[] });
+      return { ok:true, id };
+    }
+    case 'listarRegras':   return { ok:true, regras: DB.regras };
+    case 'salvarRegra': {
+      const id='r'+Date.now();
+      DB.regras.push({ id, tipo:d.tipo||'', perfil:d.perfil||'', transportadorId:d.transportadorId, transportadorNome:d.transportadorNome, desc:d.desc||'' });
+      return { ok:true, id };
+    }
+    case 'removerRegra': {
+      DB.regras = DB.regras.filter(r=>r.id!==d.id);
+      return { ok:true };
+    }
+    default: return { ok:false, error:'Ação não encontrada: '+action };
+  }
+}
+
+let currentUser = null;
+let currentFreteId = null;
+let uploadedNF = null;
+let uploadedFoto = null;
+let pontosState = [];
+let pickerDropdownId = null;
+
+// ===================== UTILS =====================
+function strHash(s){let h=0;for(let i=0;i<s.length;i++)h=(Math.imul(31,h)+s.charCodeAt(i))|0;return Math.abs(h).toString(36).slice(0,8)}
+
+// ===================== HUBS =====================
+const HUBS = {
+  'Mottu Maceió':           ['Mottu Arapiraca'],
+  'Mottu Aracaju':          ['Mottu Nossa Senhora do Socorro','Mottu Lagarto'],
+  'Mottu Salvador':         ['Mottu Feira de Santana','Mottu Jequié','Mottu Vitória da Conquista','Mottu Itabuna','Mottu Eunápolis','Mottu Porto Seguro','Mottu Teixeira de Freitas'],
+  'Mottu Fortaleza':        ['Mottu Caucaia','Mottu Messejana','Mottu Maracanaú','Mottu Sobral','Mottu Itapipoca','Mottu Parnaíba'],
+  'Mottu Juazeiro do Norte':['Mottu Petrolina','Mottu Juazeiro','Mottu Crato'],
+  'Mottu São Luís':         ['Mottu Imperatriz','Mottu Marabá','Mottu Parauapebas','Mottu Fátima','Mottu São José de Ribamar'],
+  'Mottu Icoaraci':         ['Mottu Manaus','Mottu Boa Vista','Mottu Macapá','Mottu Abaetetuba','Mottu Ananindeua','Mottu Castanhal','Mottu Bragança'],
+  'Mottu Campina Grande':   ['Mottu Patos'],
+  'Mottu Porto Alegre':     ['Mottu Pelotas','Mottu Caxias do Sul','Mottu Passo Fundo','Mottu Santa Maria'],
+  'Mottu Curitiba':         ['Mottu Ponta Grossa','Mottu Cascavel','Mottu Toledo','Mottu Foz do Iguaçu','Mottu Paranaguá'],
+  'Mottu Presidente Prudente':['Mottu Araçatuba','Mottu São José do Rio Preto','Mottu Votuporanga','Mottu Campo Grande','Mottu Dourados'],
+  'Mottu Avaré':            ['Mottu Botucatu','Mottu Itapetininga','Mottu Marília','Mottu Ourinhos','Mottu Bauru'],
+  'Mottu Goiânia':          ['Mottu Anápolis','Mottu Valparaíso','Mottu Brasília','Mottu Rio Verde','Mottu Rondonópolis','Mottu Várzea Grande','Mottu Cuiabá','Mottu Sinop','Mottu Palmas','Mottu Barreiras'],
+  'Mottu Belo Horizonte':   ['Mottu Contagem','Mottu Sete Lagoas','Mottu Montes Claros','Mottu Patos de Minas'],
+  'Mottu Pouso Alegre':     ['Mottu Poços de Caldas'],
+  'Mottu Itaboraí':         ['Mottu Niterói','Mottu Vila Isabel','Mottu Madureira','Mottu Jacarepaguá','Mottu Nova Friburgo','Mottu Teresópolis','Mottu Duque de Caxias','Mottu Campo Grande - RJ'],
+  'Mottu Vila Velha':       ['Mottu Cariacica','Mottu Vitória','Mottu Serra','Mottu Colatina','Mottu Linhares','Mottu Governador Valadares','Mottu Ipatinga'],
+  'Mottu Teresina':         ['Mottu Piçarreira'],
+  'Mottu Bayeux':           ['Mottu João Pessoa'],
+  'Mottu Parnamirim':       ['Mottu Natal'],
+};
+
+// Estado do formulário hub
+let hubDestinosState = {}; // { nomeDestino: { ativo, pallets, fotoFile, fotoNome } }
+
+function initHubForm(){
+  // Popula select de hubs
+  const sel = document.getElementById('hub-origem');
+  if(!sel) return;
+  sel.innerHTML = '<option value="">Selecione o hub...</option>' +
+    Object.keys(HUBS).map(h=>`<option value="${h}">${h}</option>`).join('');
+  hubDestinosState = {};
+  document.getElementById('hub-destinos-section').style.display = 'none';
+  document.getElementById('hub-destinos-list').innerHTML = '';
+  const d = document.getElementById('hub-data'); if(d) d.value='';
+  const o = document.getElementById('hub-obs'); if(o) o.value='';
+}
+
+function renderDestinosHub(hubNome){
+  const section = document.getElementById('hub-destinos-section');
+  const list = document.getElementById('hub-destinos-list');
+  if(!hubNome){ section.style.display='none'; return; }
+
+  const destinos = HUBS[hubNome] || [];
+  hubDestinosState = {};
+  destinos.forEach(d => hubDestinosState[d] = {ativo:false, pallets:'', fotoFile:null, fotoNome:null});
+
+  section.style.display = 'block';
+  renderHubDestinosList();
+}
+
+function renderHubDestinosList(){
+  const list = document.getElementById('hub-destinos-list');
+  list.innerHTML = Object.entries(hubDestinosState).map(([nome, st]) => `
+    <div class="hub-destino-item ${st.ativo?'ativo':''}" id="hd-${CSS.escape(nome)}">
+      <label class="hub-destino-check">
+        <input type="checkbox" ${st.ativo?'checked':''} onchange="toggleDestinoHub('${nome.replace(/'/g,"\\'")}',this.checked)">
+        <span class="hub-destino-nome">${nome.replace('Mottu ','')}</span>
+      </label>
+      ${st.ativo ? `
+        <div class="hub-destino-fields">
+          <div class="field" style="margin:0">
+            <label>Qtd de pallets *</label>
+            <input type="number" min="1" value="${st.pallets||''}" placeholder="ex: 3"
+              oninput="hubDestinosState['${nome.replace(/'/g,"\\'")}'].pallets=this.value">
+          </div>
+          <div style="display:flex;flex-direction:column;gap:4px">
+            <label style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.4px;color:var(--text2)">Foto da mercadoria</label>
+            ${st.fotoNome
+              ? `<div class="uploaded-file" style="margin:0"><span>📷</span><span class="file-name" style="font-size:11px">${st.fotoNome}</span><span class="file-remove" onclick="removerFotoHub('${nome.replace(/'/g,"\\'")}')">✕</span></div>`
+              : `<div class="upload-area" style="padding:8px;text-align:center" onclick="document.getElementById('hfoto-${strHash(nome)}').click()">
+                  <span style="font-size:14px">📷</span>
+                  <p style="font-size:10px;margin-top:2px">Adicionar foto</p>
+                </div>
+                <input type="file" id="hfoto-${strHash(nome)}" style="display:none" accept=".jpg,.jpeg,.png" onchange="handleFotoHub(event,'${nome.replace(/'/g,"\\'")}')">` }
+          </div>
+        </div>` : ''}
+    </div>`).join('');
+}
+
+function toggleDestinoHub(nome, ativo){
+  if(hubDestinosState[nome]) hubDestinosState[nome].ativo = ativo;
+  renderHubDestinosList();
+}
+
+function handleFotoHub(e, nome){
+  const file = e.target.files[0]; if(!file) return;
+  if(hubDestinosState[nome]){ hubDestinosState[nome].fotoFile=file; hubDestinosState[nome].fotoNome=file.name; }
+  renderHubDestinosList();
+}
+
+function removerFotoHub(nome){
+  if(hubDestinosState[nome]){ hubDestinosState[nome].fotoFile=null; hubDestinosState[nome].fotoNome=null; }
+  renderHubDestinosList();
+}
+
+function submitHubSolicitacao(){
+  const hub = document.getElementById('hub-origem').value;
+  const data = document.getElementById('hub-data').value;
+  const obs = document.getElementById('hub-obs').value;
+  const ativos = Object.entries(hubDestinosState).filter(([,st])=>st.ativo);
+
+  if(!hub){ showToast('Selecione o hub de origem','error'); return; }
+  if(!ativos.length){ showToast('Marque ao menos um destino com mercadoria','error'); return; }
+  if(!data){ showToast('Informe a data ideal de coleta','error'); return; }
+  for(const [nome,st] of ativos){
+    if(!st.pallets){ showToast(`Informe a qtd de pallets para ${nome.replace('Mottu ','')}`, 'error'); return; }
+  }
+
+  const hubData = FILIAIS.find(f=>f.nome===hub);
+  const frete = {
+    id:'HUB-'+Date.now()+'-'+Math.random().toString(36).slice(2,6).toUpperCase(),
+    tipoFrete:'hub',
+    solicitanteId:currentUser.id,
+    solicitanteNome:currentUser.name,
+    solicitanteEmail:DB.users.find(u=>u.id===currentUser.id)?.email||'',
+    hub,
+    hubEndereco: hubData?.endereco||'',
+    hubCep: hubData?.cep||'',
+    hubCidade: hubData?.cidade||'',
+    destinos: ativos.map(([nome,st])=>{
+      const fd=FILIAIS.find(f=>f.nome===nome)||{};
+      return {filial:nome, endereco:fd.endereco||'', cep:fd.cep||'', cidade:fd.cidade||nome, pallets:st.pallets, fotoNome:st.fotoNome||null};
+    }),
+    data, obs,
+    status:'pending',
+    transportadorId:null, transportadorNome:null, valor:null,
+    createdAt:new Date().toISOString().slice(0,10),
+    lances:[],
+    timeline:[{ev:'Solicitado — mercadoria disponível no hub',t:now()}]
+  };
+
+  DB.fretes.push(frete);
+  hubDestinosState={};
+  closeModal('modal-solicitar');
+  showToast('Coleta em hub solicitada! Aguardando aprovação do gestor.','success');
+  setupSidebar();go(curPage);
+}
+
+// Página de hubs para o gestor
+function renderHubs(c, actions){
+  actions.innerHTML=`<button class="btn-accent" onclick="abrirSolicitacao()">＋ Nova solicitação</button>`;
+  const hubFretes = DB.fretes.filter(f=>f.tipoFrete==='hub');
+  const pendentes = hubFretes.filter(f=>f.status==='pending');
+  const outros = hubFretes.filter(f=>f.status!=='pending');
+
+  // Mapa: hub → lista de solicitações pendentes
+  const porHub = {};
+  pendentes.forEach(f=>{
+    if(!porHub[f.hub]) porHub[f.hub]=[];
+    porHub[f.hub].push(f);
+  });
+
+  c.innerHTML=`
+    <div class="stats-grid" style="grid-template-columns:repeat(3,1fr);margin-bottom:24px">
+      <div class="stat-card accent"><div class="stat-label">Hubs com mercadoria pendente</div><div class="stat-value">${Object.keys(porHub).length}</div></div>
+      <div class="stat-card"><div class="stat-label">Solicitações pendentes</div><div class="stat-value">${pendentes.length}</div></div>
+      <div class="stat-card"><div class="stat-label">Total histórico</div><div class="stat-value">${hubFretes.length}</div></div>
+    </div>
+
+    ${Object.keys(porHub).length ? `
+      <div style="margin-bottom:8px;font-size:11px;font-weight:600;letter-spacing:.8px;text-transform:uppercase;color:var(--text3)">Hubs aguardando coleta</div>
+      ${Object.entries(porHub).map(([hub, fretes])=>`
+        <div style="background:var(--bg2);border:1px solid rgba(255,140,66,.25);border-radius:var(--radius-lg);margin-bottom:12px;overflow:hidden">
+          <div style="padding:14px 20px;background:var(--orange-dim);display:flex;align-items:center;justify-content:space-between">
+            <div>
+              <div style="font-family:var(--font-display);font-style:italic;font-weight:800;font-size:16px;text-transform:uppercase">🏪 ${hub.replace('Mottu ','')}</div>
+              <div style="font-size:12px;color:var(--text2);margin-top:2px">${FILIAIS.find(f=>f.nome===hub)?.endereco||''}</div>
+            </div>
+            <div style="text-align:right">
+              <div style="font-size:11px;color:var(--text3)">solicitações</div>
+              <div style="font-family:var(--font-display);font-style:italic;font-weight:800;font-size:22px;color:var(--orange)">${fretes.length}</div>
+            </div>
+          </div>
+          ${fretes.map(f=>`
+            <div style="padding:14px 20px;border-top:1px solid var(--border)">
+              <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:10px">
+                <div>
+                  <div style="font-size:11px;color:var(--text3);margin-bottom:2px">${displayId(f.id)} • Solicitado por ${f.solicitanteNome} • Data ideal: <strong style="color:var(--text)">${fmtDate(f.data)}</strong></div>
+                  <div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:6px">
+                    ${f.destinos.map(d=>`
+                      <div style="padding:4px 10px;background:var(--bg3);border:1px solid var(--border);border-radius:6px;font-size:12px">
+                        <span style="color:var(--text)">${d.filial.replace('Mottu ','')}</span>
+                        <span style="color:var(--accent);font-weight:600;margin-left:6px">🏗️ ${d.pallets} pallet${d.pallets>1?'s':''}</span>
+                        ${d.fotoNome?`<span style="color:var(--text3);margin-left:4px">📷</span>`:''}
+                      </div>`).join('')}
+                  </div>
+                </div>
+                <div style="display:flex;gap:8px;flex-shrink:0;margin-left:12px">
+                  <button class="action-btn view" onclick="verDetalheHub('${f.id}')">Ver</button>
+                  <button class="action-btn approve" onclick="aprovarHub('${f.id}')">✓ Aprovar</button>
+                  <button class="action-btn reject" onclick="recusar('${f.id}')">✕</button>
+                </div>
+              </div>
+              ${f.obs?`<div style="font-size:12px;color:var(--text2);padding:8px 10px;background:var(--bg3);border-radius:6px">${f.obs}</div>`:''}
+            </div>`).join('')}
+        </div>`).join('')}` :
+      `<div class="empty-state"><div class="empty-icon">🏪</div>Nenhum hub com mercadoria pendente</div>`}
+
+    ${outros.length?`
+      <div style="margin-top:24px">
+        <div class="table-card">
+          <div class="table-header"><div class="table-title">Histórico de coletas em hub</div></div>
+          <table><thead><tr><th>ID</th><th>Hub</th><th>Destinos</th><th>Data</th><th>Status</th><th>Ações</th></tr></thead>
+          <tbody>${outros.map(f=>`<tr>
+            <td style="font-family:monospace;font-size:11px;color:var(--text3)">${displayId(f.id)}</td>
+            <td class="tdm">${f.hub?.replace('Mottu ','')}</td>
+            <td style="font-size:12px">${f.destinos?.map(d=>d.filial.replace('Mottu ','')).join(', ')}</td>
+            <td>${fmtDate(f.data)}</td>
+            <td>${badge(f.status)}</td>
+            <td><button class="action-btn view" onclick="verDetalheHub('${f.id}')">Ver</button></td>
+          </tr>`).join('')}</tbody></table>
+        </div>
+      </div>`:''
+    }`;
+}
+
+function aprovarHub(id){
+  const f = DB.fretes.find(x=>x.id===id);
+  f.status='approved';
+  f.timeline.push({ev:'Aprovado pelo gestor',t:now()});
+  showToast('Coleta em hub aprovada!','success');
+  setupSidebar();go(curPage);
+}
+
+function verDetalheHub(id){
+  const f = DB.fretes.find(x=>x.id===id); if(!f) return;
+  document.getElementById('modal-det-title').textContent=`Hub ${displayId(f.id)}`;
+  const solUser=DB.users.find(u=>u.id===f.solicitanteId);
+  const body=document.getElementById('modal-det-body');
+  body.innerHTML=`
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px">
+      ${badge(f.status)}
+      <span class="ftype-tag" style="background:var(--orange-dim);color:var(--orange)">🏪 Coleta em Hub</span>
+      <span style="font-size:12px;color:var(--text3)">${fmtDate(f.createdAt)}</span>
+    </div>
+
+    <div style="padding:12px 14px;background:var(--orange-dim);border:1px solid rgba(255,140,66,.2);border-radius:8px;margin-bottom:14px">
+      <div style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:var(--text3);margin-bottom:4px">Hub de origem</div>
+      <div style="font-size:14px;font-weight:600">${f.hub}</div>
+      <div style="font-size:12px;color:var(--text2)">${f.hubEndereco} — CEP ${f.hubCep} — ${f.hubCidade}</div>
+    </div>
+
+    <div class="form-section-title">Destinos e volumes</div>
+    ${(f.destinos||[]).map(d=>`
+      <div style="background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:12px;margin-bottom:6px;display:flex;align-items:center;justify-content:space-between">
+        <div>
+          <div style="font-size:13px;font-weight:500">${d.filial}</div>
+          <div style="font-size:11px;color:var(--text2)">${d.endereco} — ${d.cidade}</div>
+        </div>
+        <div style="text-align:right">
+          <div style="font-family:var(--font-display);font-style:italic;font-weight:800;font-size:18px;color:var(--accent)">${d.pallets}</div>
+          <div style="font-size:10px;color:var(--text3)">pallet${d.pallets>1?'s':''}</div>
+          ${d.fotoNome?`<div style="font-size:11px;color:var(--text3);margin-top:2px">📷 ${d.fotoNome}</div>`:''}
+        </div>
+      </div>`).join('')}
+
+    <div style="margin-top:12px;display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px">
+      <div><div style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:var(--text3);margin-bottom:3px">Data ideal de coleta</div><div style="font-size:14px">${fmtDate(f.data)}</div></div>
+      <div><div style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:var(--text3);margin-bottom:3px">Total de pallets</div><div style="font-size:14px;font-weight:600;color:var(--accent)">${(f.destinos||[]).reduce((a,d)=>a+parseInt(d.pallets||0),0)}</div></div>
+    </div>
+
+    ${f.obs?`<div style="padding:10px 12px;background:var(--bg3);border-radius:8px;margin-bottom:12px;font-size:13px;color:var(--text2)">${f.obs}</div>`:''}
+
+    <div style="padding:12px 14px;background:var(--bg3);border:1px solid var(--border);border-radius:8px">
+      <div style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:var(--text3);margin-bottom:6px">Solicitante</div>
+      <div style="font-size:13px;font-weight:500">${f.solicitanteNome}</div>
+      ${solUser?.email?`<div style="font-size:12px;color:var(--text2)">✉️ ${solUser.email}</div>`:''}
+    </div>
+
+    <div class="form-section-title" style="margin-top:16px">Histórico</div>
+    <div class="timeline">${(f.timeline||[]).map(t=>`<div class="tl-item"><div class="tl-dot done"></div><div><div class="tl-title">${t.ev}</div><div class="tl-time">${t.t}</div></div></div>`).join('')}</div>`;
+
+  const footer=document.getElementById('modal-det-footer');
+  footer.innerHTML='<button class="btn-secondary" onclick="closeModal(\'modal-detalhe\')">Fechar</button>';
+  if(currentUser.role==='gestor'&&f.status==='pending')
+    footer.innerHTML+=`<button class="btn-secondary" style="color:var(--red)" onclick="closeModal('modal-detalhe');recusar('${f.id}')">Recusar</button><button class="btn-accent" onclick="closeModal('modal-detalhe');aprovarHub('${f.id}')">✓ Aprovar</button>`;
+  openModal('modal-detalhe');
+}
+
+// ===================== AUTH =====================
+async function doLogin(){
+  const email=document.getElementById('login-email').value.trim();
+  const pass=document.getElementById('login-pass').value;
+  if(!email||!pass){showToast('Preencha e-mail e senha','error');return}
+  const r = await api('login',{email, senha:pass});
+  if(!r.ok){showToast(r.error||'Erro ao entrar','error');return}
+  // Normaliza campos (API retorna 'nome', local usa 'name')
+  currentUser = { ...r.user, name: r.user.nome||r.user.name };
+  showApp();
+}
+async function doRegister(){
+  const name=document.getElementById('reg-name').value.trim();
+  const email=document.getElementById('reg-email').value.trim();
+  const pass=document.getElementById('reg-pass').value;
+  const setor=document.getElementById('reg-setor').value.trim();
+  if(!name||!email||!pass){showToast('Preencha todos os campos','error');return}
+  const r = await api('register',{nome:name, email, senha:pass, setor, role:'solicitante'});
+  if(!r.ok){showToast(r.error||'Erro ao cadastrar','error');return}
+  // Faz login automático após cadastro
+  const lr = await api('login',{email, senha:pass});
+  if(!lr.ok){showToast('Conta criada! Faça login.','success');switchTab('login');return}
+  currentUser={ ...lr.user, name:lr.user.nome||lr.user.name };
+  showApp();
+}
+function doLogout(){
+  currentUser=null;
+  document.getElementById('screen-app').classList.remove('active');
+  document.getElementById('screen-login').classList.add('active');
+}
+function switchTab(t){
+  document.querySelectorAll('.login-tab').forEach((el,i)=>el.classList.toggle('active',(t==='login'&&i===0)||(t==='register'&&i===1)));
+  document.getElementById('form-login').style.display=t==='login'?'block':'none';
+  document.getElementById('form-register').style.display=t==='register'?'block':'none';
+}
+document.getElementById('login-pass').addEventListener('keydown',e=>{if(e.key==='Enter')doLogin()});
+
+// ===================== APP =====================
+async function showApp(){
+  document.getElementById('screen-login').classList.remove('active');
+  document.getElementById('screen-app').classList.add('active');
+  // Carregar dados do servidor
+  await carregarDados();
+  setupSidebar();
+}
+
+async function carregarDados(){
+  // Fretes
+  const rf = await api('listarFretes',{role:currentUser.role, userId:currentUser.id});
+  if(rf.ok && !MODO_DEMO) DB.fretes = rf.fretes;
+  // Transportadores (apenas para gestor)
+  if(currentUser.role==='gestor'){
+    const rt = await api('listarTransportadores');
+    if(rt.ok && !MODO_DEMO) {
+      DB.users = DB.users.filter(u=>u.role!=='transportador');
+      rt.transportadores.forEach(t=>DB.users.push({...t, name:t.nome, pass:'', role:'transportador'}));
+    }
+    const rr = await api('listarRegras');
+    if(rr.ok && !MODO_DEMO) DB.regras = rr.regras;
+  }
+}
+function setupSidebar(){
+  const u=currentUser;
+  document.getElementById('user-av').textContent=u.name.split(' ').map(n=>n[0]).slice(0,2).join('');
+  document.getElementById('user-nm').textContent=u.name;
+  document.getElementById('user-em').textContent=u.email;
+  document.getElementById('sidebar-role-label').textContent={gestor:'Gestor',solicitante:'Solicitante',transportador:'Transportador'}[u.role];
+  const navs={
+    gestor:[{id:'dashboard',icon:'◈',label:'Dashboard'},{id:'pendentes',icon:'⏳',label:'Pendentes',badge:'pending'},{id:'licitacoes',icon:'🏷️',label:'Licitações',badge:'bidding'},{id:'hubs',icon:'🏪',label:'Coletas em Hub'},{id:'fretes',icon:'🚛',label:'Todos os fretes'},{id:'transportadores',icon:'👥',label:'Transportadores'},{id:'regras',icon:'⚙️',label:'Alocação automática'},{id:'relatorios',icon:'📊',label:'Relatórios'}],
+    solicitante:[{id:'meus-fretes',icon:'📦',label:'Meus fretes'},{id:'novo-frete',icon:'＋',label:'Nova solicitação'}],
+    transportador:[{id:'dashboard-t',icon:'◈',label:'Dashboard'},{id:'disponiveis',icon:'🏷️',label:'Todos os fretes'},{id:'meus-fretes-t',icon:'🚛',label:'Meus fretes'},{id:'historico-t',icon:'📋',label:'Histórico'}]
+  };
+  const nav=document.getElementById('sidebar-nav');
+  nav.innerHTML='';
+  (navs[u.role]||[]).forEach(item=>{
+    const cnt=item.badge?DB.fretes.filter(f=>f.status===item.badge).length:0;
+    nav.innerHTML+=`<div class="nav-item" id="nav-${item.id}" onclick="go('${item.id}')"><span class="nav-icon">${item.icon}</span><span>${item.label}</span>${cnt>0?`<span class="nav-badge">${cnt}</span>`:''}</div>`;
+  });
+  const defaults={gestor:'dashboard',solicitante:'meus-fretes',transportador:'dashboard-t'};
+  go(defaults[u.role]);
+}
+
+let curPage='';
+function go(page){
+  curPage=page;
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  const el=document.getElementById('nav-'+page);
+  if(el)el.classList.add('active');
+  const titles={dashboard:'Dashboard',pendentes:'Pendentes',licitacoes:'Licitações — escolher transportador',hubs:'Coletas em Hub',fretes:'Todos os fretes',transportadores:'Transportadores',regras:'Alocação automática',relatorios:'Relatórios','meus-fretes':'Meus fretes','novo-frete':'Nova solicitação','dashboard-t':'Dashboard',disponiveis:'Todos os fretes disponíveis','meus-fretes-t':'Meus fretes','historico-t':'Histórico'};
+  document.getElementById('topbar-title').textContent=titles[page]||'';
+  const actions=document.getElementById('topbar-actions');actions.innerHTML='';
+  const c=document.getElementById('main-content');
+  if(page==='dashboard')renderDashboard(c,actions);
+  else if(page==='pendentes')renderPendentes(c,actions);
+  else if(page==='licitacoes')renderLicitacoes(c,actions);
+  else if(page==='hubs')renderHubs(c,actions);
+  else if(page==='fretes')renderTodos(c,actions);
+  else if(page==='transportadores')renderTransportadores(c,actions);
+  else if(page==='regras')renderRegras(c,actions);
+  else if(page==='relatorios')renderRelatorios(c,actions);
+  else if(page==='meus-fretes')renderMeusFretes(c,actions);
+  else if(page==='novo-frete'){abrirSolicitacao();go('meus-fretes')}
+  else if(page==='disponiveis')renderDisponiveis(c,actions);
+  else if(page==='dashboard-t')renderDashboardTransp(c,actions);
+  else if(page==='meus-fretes-t')renderFretesTrans(c,actions,false);
+  else if(page==='historico-t')renderFretesTrans(c,actions,true);
+}
+
+// ===================== STATUS / HELPERS =====================
+const SM={pending:{label:'Pendente',cls:'pending'},approved:{label:'Aprovado',cls:'approved'},bidding:{label:'Em licitação',cls:'bidding'},transit:{label:'Em trânsito',cls:'transit'},done:{label:'Concluído',cls:'done'},rejected:{label:'Recusado',cls:'rejected'},auto:{label:'Auto-alocado',cls:'auto'}};
+const UM={normal:'Normal',alta:'Alta ⚡',critica:'Crítica 🔴'};
+const PM={envelope:'✉️ Envelope',caixa:'📦 Caixa pequena',volumes:'🗃️ Volumes',pallet:'🏗️ Pallet'};
+function badge(s){const x=SM[s]||{label:s,cls:'pending'};return `<span class="badge ${x.cls}">${x.label}</span>`}
+function now(){return new Date().toLocaleString('pt-BR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'}).replace(',','')}
+function fmtDate(d){if(!d)return'—';const p=d.split('-');return`${p[2]}/${p[1]}/${p[0]}`}
+function rotaResumo(f){
+  if(f.tipoFrete==='hub'){
+    const hub=(f.hub||'').replace('Mottu ','');
+    const dests=(f.destinos||[]).map(d=>d.filial.replace('Mottu ','')).join(', ');
+    return `${hub} → ${dests}`;
+  }
+  if(!f.pontos||!f.pontos.length)return f.origem||'—';
+  const cs=f.pontos.filter(p=>p.tipo==='coleta');
+  const es=f.pontos.filter(p=>p.tipo==='entrega');
+  return cs.map(p=>p.cidade||p.filial).join(', ')+' → '+es.map(p=>p.cidade||p.filial).join(', ');
+}
+
+// ===================== PAGES =====================
+function renderDashboard(c,actions){
+  actions.innerHTML=`<button class="btn-accent" onclick="abrirSolicitacao()">＋ Novo frete</button>`;
+  const total=DB.fretes.length,pend=DB.fretes.filter(f=>f.status==='pending').length,bid=DB.fretes.filter(f=>f.status==='bidding').length,done=DB.fretes.filter(f=>f.status==='done').length,valor=DB.fretes.filter(f=>f.valor).reduce((a,f)=>a+parseFloat(f.valor||0),0);
+  c.innerHTML=`<div class="stats-grid">
+    <div class="stat-card"><div class="stat-label">Total</div><div class="stat-value">${total}</div><div class="stat-sub">todos os fretes</div></div>
+    <div class="stat-card accent"><div class="stat-label">Pendentes</div><div class="stat-value">${pend}</div><div class="stat-sub">aguardando aprovação</div></div>
+    <div class="stat-card"><div class="stat-label">Em licitação</div><div class="stat-value">${bid}</div><div class="stat-sub">aguardando escolha</div></div>
+    <div class="stat-card"><div class="stat-label">Valor total</div><div class="stat-value" style="font-size:22px">R$${valor.toLocaleString('pt-BR')}</div><div class="stat-sub">${done} concluídos</div></div>
+  </div>
+  <div class="table-card"><div class="table-header"><div class="table-title">Recentes</div><button class="btn-secondary" onclick="go('fretes')">Ver todos →</button></div>${freteTable([...DB.fretes].reverse().slice(0,6),'gestor')}</div>`;
+}
+
+function renderPendentes(c,actions){
+  const list=DB.fretes.filter(f=>f.status==='pending');
+  c.innerHTML=`<div class="table-card"><div class="table-header"><div class="table-title">Aguardando aprovação (${list.length})</div></div>${freteTable(list,'gestor')}</div>`;
+}
+
+function renderLicitacoes(c,actions){
+  const list=DB.fretes.filter(f=>f.status==='bidding'||f.status==='approved');
+  c.innerHTML=`<div class="table-card"><div class="table-header"><div class="table-title">Fretes em licitação (${list.length})</div></div>${freteTable(list,'licitacao')}</div>`;
+}
+
+function renderTodos(c,actions){
+  actions.innerHTML=`<button class="btn-accent" onclick="abrirSolicitacao()">＋ Novo frete</button><select class="filter-select" style="padding:7px 10px;background:var(--bg3);border:1px solid var(--border);border-radius:7px;color:var(--text2);font-size:12px;outline:none" onchange="renderTodos(document.getElementById('main-content'),document.getElementById('topbar-actions'))"><option value="">Todos</option><option value="pending">Pendente</option><option value="bidding">Em licitação</option><option value="transit">Em trânsito</option><option value="done">Concluído</option><option value="rejected">Recusado</option></select>`;
+  const filt=document.querySelector('.filter-select')?.value||'';
+  const list=filt?DB.fretes.filter(f=>f.status===filt):[...DB.fretes];
+  c.innerHTML=`<div class="table-card"><div class="table-header"><div class="table-title">Fretes (${list.length})</div></div>${freteTable(list.reverse(),'gestor')}</div>`;
+}
+
+function renderMeusFretes(c,actions){
+  actions.innerHTML=`<button class="btn-accent" onclick="abrirSolicitacao()">＋ Nova solicitação</button>`;
+  const list=DB.fretes.filter(f=>f.solicitanteId===currentUser.id);
+  c.innerHTML=`<div class="table-card"><div class="table-header"><div class="table-title">Minhas solicitações</div></div>${freteTable([...list].reverse(),'solicitante')}</div>`;
+}
+
+// Helper: extrai estados de um frete (pontos de coleta ou hub)
+function estadosDofrete(f){
+  const estados=new Set();
+  if(f.tipoFrete==='hub'){
+    const filialHub=FILIAIS.find(x=>x.nome===f.hub);
+    if(filialHub) estados.add(ufDeCidade(filialHub.cidade,filialHub.cep));
+  } else {
+    (f.pontos||[]).filter(p=>p.tipo==='coleta').forEach(p=>{
+      const uf=ufDeCidade(p.cidade,p.cep);
+      if(uf) estados.add(uf);
+    });
+  }
+  return [...estados];
+}
+
+// Mapeia cidade/CEP para UF usando o prefixo do CEP
+function ufDeCidade(cidade, cep){
+  if(!cep) return null;
+  const n=parseInt((cep||'').replace(/\D/g,'').slice(0,5));
+  if(n>=1000000&&n<=19999999) return 'SP';
+  if(n>=20000000&&n<=28999999) return 'RJ';
+  if(n>=29000000&&n<=29999999) return 'ES';
+  if(n>=30000000&&n<=39999999) return 'MG';
+  if(n>=40000000&&n<=48999999) return 'BA';
+  if(n>=49000000&&n<=49999999) return 'SE';
+  if(n>=50000000&&n<=56999999) return 'PE';
+  if(n>=57000000&&n<=57999999) return 'AL';
+  if(n>=58000000&&n<=58999999) return 'PB';
+  if(n>=59000000&&n<=59999999) return 'RN';
+  if(n>=60000000&&n<=63999999) return 'CE';
+  if(n>=64000000&&n<=64999999) return 'PI';
+  if(n>=65000000&&n<=65999999) return 'MA';
+  if(n>=66000000&&n<=68999999) return 'PA';
+  if(n>=69000000&&n<=69299999) return 'AM';
+  if(n>=69300000&&n<=69399999) return 'RR';
+  if(n>=69400000&&n<=69899999) return 'AM';
+  if(n>=69900000&&n<=69999999) return 'AC';
+  if(n>=70000000&&n<=73699999) return 'DF';
+  if(n>=73700000&&n<=76799999) return 'GO';
+  if(n>=76800000&&n<=76999999) return 'RO';
+  if(n>=77000000&&n<=77999999) return 'TO';
+  if(n>=78000000&&n<=78899999) return 'MT';
+  if(n>=78900000&&n<=78999999) return 'MS';
+  if(n>=79000000&&n<=79999999) return 'MS';
+  if(n>=80000000&&n<=87999999) return 'PR';
+  if(n>=88000000&&n<=89999999) return 'SC';
+  if(n>=90000000&&n<=99999999) return 'RS';
+  return null;
+}
+
+function renderDashboardTransp(c, actions){
+  const u=currentUser;
+  const estados=u.estados||[];
+  const disponiveis=DB.fretes.filter(f=>f.status==='bidding'||f.status==='approved');
+  const ativos=DB.fretes.filter(f=>f.transportadorId===u.id&&f.status!=='done');
+  const concluidos=DB.fretes.filter(f=>f.transportadorId===u.id&&f.status==='done');
+  const valor=concluidos.filter(f=>f.valor).reduce((a,f)=>a+parseFloat(f.valor||0),0);
+
+  // Fretes recomendados: coleta em estado que o transportador atende
+  const recomendados = estados.length
+    ? disponiveis.filter(f=>{
+        const ufs=estadosDofrete(f);
+        return ufs.some(uf=>estados.includes(uf));
+      })
+    : [];
+  const outros = disponiveis.filter(f=>!recomendados.includes(f));
+
+  const semEstados = !estados.length;
+
+  c.innerHTML=`
+    <div class="stats-grid" style="grid-template-columns:repeat(3,1fr);margin-bottom:24px">
+      <div class="stat-card accent"><div class="stat-label">Recomendados para você</div><div class="stat-value">${recomendados.length}</div><div class="stat-sub">na sua região</div></div>
+      <div class="stat-card"><div class="stat-label">Em andamento</div><div class="stat-value">${ativos.length}</div><div class="stat-sub">fretes atribuídos</div></div>
+      <div class="stat-card"><div class="stat-label">Valor recebido</div><div class="stat-value" style="font-size:22px">R$${valor.toLocaleString('pt-BR')}</div><div class="stat-sub">${concluidos.length} concluídos</div></div>
+    </div>
+
+    ${semEstados ? `
+      <div style="padding:16px 18px;background:var(--yellow-dim);border:1px solid rgba(245,197,24,.25);border-radius:var(--radius);margin-bottom:20px;display:flex;align-items:flex-start;gap:12px">
+        <span style="font-size:20px">⚠️</span>
+        <div>
+          <div style="font-size:13px;font-weight:600;color:var(--yellow);margin-bottom:3px">Você não cadastrou seus estados de atuação</div>
+          <div style="font-size:12px;color:var(--text2)">Sem isso não conseguimos recomendar fretes na sua região. Entre em contato com o gestor para atualizar seu cadastro.</div>
+        </div>
+      </div>` : `
+      <div style="padding:10px 14px;background:var(--accent-dim2);border:1px solid rgba(0,177,49,.15);border-radius:var(--radius);margin-bottom:20px;font-size:12px;color:var(--text2)">
+        📍 Sua região de atuação: <strong style="color:var(--accent)">${estados.join(' • ')}</strong>
+      </div>`}
+
+    ${recomendados.length ? `
+      <div style="margin-bottom:8px;font-size:11px;font-weight:600;letter-spacing:.8px;text-transform:uppercase;color:var(--text3)">Recomendados para você</div>
+      ${recomendados.map(f=>freteCardTransp(f)).join('')}
+    ` : !semEstados ? `
+      <div class="empty-state" style="padding:32px"><div class="empty-icon">🎉</div>Nenhum frete disponível na sua região agora</div>
+    ` : ''}
+
+    ${outros.length ? `
+      <div style="margin:${recomendados.length?'20px':''} 0 8px;font-size:11px;font-weight:600;letter-spacing:.8px;text-transform:uppercase;color:var(--text3)">Outros fretes disponíveis</div>
+      ${outros.slice(0,3).map(f=>freteCardTransp(f,true)).join('')}
+      ${outros.length>3?`<div style="text-align:center;margin-top:8px"><button class="btn-secondary" onclick="go('disponiveis')">Ver todos os ${outros.length} fretes →</button></div>`:''}
+    ` : ''}`;
+}
+
+function freteCardTransp(f, dimmed=false){
+  const jaDei=f.lances?.some(l=>l.transportadorId===currentUser.id);
+  const coletas=(f.pontos||[]).filter(p=>p.tipo==='coleta');
+  const entregas=(f.pontos||[]).filter(p=>p.tipo==='entrega');
+  const ufs=estadosDofrete(f);
+  return `<div style="background:var(--bg2);border:1px solid ${dimmed?'var(--border)':'rgba(0,177,49,.2)'};border-radius:var(--radius-lg);padding:16px;margin-bottom:8px;${dimmed?'opacity:.8':''}">
+    <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px">
+      <div style="flex:1;min-width:0">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;flex-wrap:wrap">
+          <span style="font-size:11px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;color:${dimmed?'var(--text3)':'var(--accent)'}">${f.tipoFrete==='hub'?'🏪 Hub':'🔀 Spot'}</span>
+          ${ufs.map(uf=>`<span style="font-size:10px;padding:2px 7px;background:var(--blue-dim);color:var(--blue);border-radius:4px;font-weight:600">${uf}</span>`).join('')}
+          ${jaDei?`<span style="font-size:11px;color:var(--yellow)">✓ Proposta enviada</span>`:''}
+        </div>
+        <div style="font-size:13px;font-weight:500;margin-bottom:4px">${rotaResumo(f)}</div>
+        <div style="display:flex;gap:14px;flex-wrap:wrap;font-size:12px;color:var(--text2)">
+          <span>📅 ${fmtDate(f.data)}</span>
+          ${f.tipoProduto?`<span>📦 ${f.tipoProduto}</span>`:''}
+          ${f.perfil?`<span>${PM[f.perfil]}</span>`:''}
+        </div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:6px;flex-shrink:0">
+        <button class="action-btn view" onclick="verDetalheTransp('${f.id}')">Ver detalhes</button>
+        ${!jaDei?`<button class="action-btn bid" onclick="abrirLance('${f.id}')">Fazer proposta</button>`:''}
+      </div>
+    </div>
+  </div>`;
+}
+
+function renderDisponiveis(c,actions){
+  const list=DB.fretes.filter(f=>f.status==='bidding'||f.status==='approved');
+  const estados=currentUser.estados||[];
+
+  // Separar recomendados dos demais
+  const recom=estados.length?list.filter(f=>estadosDofrete(f).some(uf=>estados.includes(uf))):[];
+  const recomIds=new Set(recom.map(f=>f.id));
+  const restante=list.filter(f=>!recomIds.has(f.id));
+
+  c.innerHTML=`
+    ${estados.length?`<div style="padding:10px 14px;background:var(--accent-dim2);border:1px solid rgba(0,177,49,.15);border-radius:var(--radius);margin-bottom:16px;font-size:12px;color:var(--text2)">
+      📍 Mostrando fretes com coleta em: <strong style="color:var(--accent)">${estados.join(' • ')}</strong> em destaque
+    </div>`:''}
+    ${recom.length?`
+      <div style="margin-bottom:8px;font-size:11px;font-weight:600;letter-spacing:.8px;text-transform:uppercase;color:var(--text3)">Na sua região (${recom.length})</div>
+      <div class="table-card" style="margin-bottom:16px;border-color:rgba(0,177,49,.2)">${freteTable(recom,'disponivel')}</div>`:''}
+    <div style="margin-bottom:8px;font-size:11px;font-weight:600;letter-spacing:.8px;text-transform:uppercase;color:var(--text3)">${recom.length?`Outras regiões (${restante.length})`:`Todos os fretes disponíveis (${list.length})`}</div>
+    <div class="table-card">${freteTable(recom.length?restante:list,'disponivel')}</div>`;
+}
+
+function renderFretesTrans(c,actions,hist){
+  const list=DB.fretes.filter(f=>f.transportadorId===currentUser.id&&(hist?f.status==='done':f.status!=='done'));
+  c.innerHTML=`<div class="table-card"><div class="table-header"><div class="table-title">${hist?'Histórico':'Fretes atribuídos'} (${list.length})</div></div>${freteTable(list,'transportador')}</div>`;
+}
+
+function renderTransportadores(c,actions){
+  actions.innerHTML=`<button class="btn-accent" onclick="abrirCadastroTransportador()">＋ Cadastrar</button>`;
+  const list=DB.users.filter(u=>u.role==='transportador');
+  c.innerHTML=`<div class="table-card"><div class="table-header"><div class="table-title">Transportadores (${list.length})</div></div><table><thead><tr><th>Nome</th><th>Tipo</th><th>Documento</th><th>Telefone</th><th>E-mail</th><th>Estados</th><th>Fretes</th></tr></thead><tbody>${list.map(t=>`<tr><td class="tdm">${t.name}</td><td>${t.tipo||'—'}</td><td>${t.doc||'—'}</td><td>${t.tel||'—'}</td><td>${t.email}</td><td style="font-size:11px">${t.estados?.length?t.estados.join(', '):'<span style="color:var(--text3)">Não informado</span>'}</td><td>${DB.fretes.filter(f=>f.transportadorId===t.id).length}</td></tr>`).join('')||'<tr><td colspan="7" class="empty-state">Nenhum cadastrado</td></tr>'}</tbody></table></div>`;
+}
+
+function renderRegras(c,actions){
+  actions.innerHTML=`<button class="btn-accent" onclick="abrirRegra()">＋ Nova regra</button>`;
+  c.innerHTML=`<div style="margin-bottom:16px;padding:14px;background:var(--accent-dim2);border:1px solid rgba(0,177,49,.15);border-radius:var(--radius);font-size:13px;color:var(--text2)">
+    <strong style="color:var(--accent)">Como funciona:</strong> Quando um frete spot é aprovado, o sistema verifica se alguma regra se aplica. Se sim, o transportador é atribuído automaticamente. Se não, o frete vai para licitação aberta.
+  </div>
+  <div id="regras-lista">${renderRegrasList()}</div>`;
+}
+
+function renderRegrasList(){
+  if(!DB.regras.length)return`<div class="empty-state"><div class="empty-icon">⚙️</div>Nenhuma regra cadastrada</div>`;
+  return DB.regras.map(r=>`<div class="regra-card">
+    <div style="font-size:20px">${r.perfil?PM[r.perfil]?.split(' ')[0]:'📦'}</div>
+    <div class="regra-info"><div class="regra-nome">${r.desc}</div>
+    <div class="regra-desc">${r.tipo||'Qualquer tipo'} • ${r.perfil?PM[r.perfil]:'Qualquer perfil'} → <strong>${r.transportadorNome}</strong></div></div>
+    <button class="regra-remove" onclick="removerRegra('${r.id}')">🗑</button>
+  </div>`).join('');
+}
+
+function abrirRegra(){
+  const sel=document.getElementById('rg-transp');
+  sel.innerHTML=DB.users.filter(u=>u.role==='transportador').map(t=>`<option value="${t.id}">${t.name}</option>`).join('');
+  openModal('modal-regra');
+}
+async function salvarRegra(){
+  const tid=document.getElementById('rg-transp').value;
+  const t=DB.users.find(u=>u.id===tid);
+  const r=await api('salvarRegra',{tipo:document.getElementById('rg-tipo').value, perfil:document.getElementById('rg-perfil').value, transportadorId:tid, transportadorNome:t?.name||t?.nome||'', desc:document.getElementById('rg-desc').value||'Regra de alocação'});
+  if(!r.ok){showToast(r.error||'Erro ao salvar','error');return}
+  DB.regras.push({id:r.id||'r'+Date.now(),tipo:document.getElementById('rg-tipo').value,perfil:document.getElementById('rg-perfil').value,transportadorId:tid,transportadorNome:t?.name||t?.nome||'',desc:document.getElementById('rg-desc').value||'Regra de alocação'});
+  closeModal('modal-regra');showToast('Regra salva!','success');
+  document.getElementById('regras-lista').innerHTML=renderRegrasList();
+}
+async function removerRegra(id){
+  await api('removerRegra',{id});
+  DB.regras=DB.regras.filter(r=>r.id!==id);
+  document.getElementById('regras-lista').innerHTML=renderRegrasList();
+  showToast('Regra removida','info');
+}
+
+function renderRelatorios(c,actions){
+  actions.innerHTML=`<button class="btn-accent" onclick="exportCSV()">⬇ Exportar CSV</button>`;
+  const total=DB.fretes.length,byS={},byT={};
+  DB.fretes.forEach(f=>{byS[f.status]=(byS[f.status]||0)+1;byT[f.tipoProduto||'—']=(byT[f.tipoProduto||'—']||0)+1});
+  const valor=DB.fretes.filter(f=>f.valor).reduce((a,f)=>a+parseFloat(f.valor||0),0);
+  const sColors={pending:'var(--orange)',approved:'var(--blue)',bidding:'var(--yellow)',transit:'var(--purple)',done:'var(--green)',rejected:'var(--red)'};
+  c.innerHTML=`
+  <div class="stats-grid" style="margin-bottom:20px">
+    <div class="stat-card"><div class="stat-label">Total</div><div class="stat-value">${total}</div></div>
+    <div class="stat-card accent"><div class="stat-label">Concluídos</div><div class="stat-value">${byS['done']||0}</div></div>
+    <div class="stat-card"><div class="stat-label">Taxa conclusão</div><div class="stat-value">${total?Math.round((byS['done']||0)/total*100):0}%</div></div>
+    <div class="stat-card"><div class="stat-label">Valor total</div><div class="stat-value" style="font-size:22px">R$${valor.toLocaleString('pt-BR')}</div></div>
+  </div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:16px">
+    <div class="table-card" style="padding:20px"><div class="table-title" style="margin-bottom:14px">Por status</div>${Object.entries(byS).map(([s,n])=>`<div style="display:flex;align-items:center;gap:10px;margin-bottom:8px"><div style="width:90px;font-size:12px;color:var(--text2)">${SM[s]?.label||s}</div><div style="flex:1;height:6px;background:var(--bg3);border-radius:3px;overflow:hidden"><div style="width:${Math.round(n/total*100)}%;height:100%;background:${sColors[s]||'var(--accent)'};border-radius:3px"></div></div><div style="width:24px;text-align:right;font-size:12px;color:var(--text2)">${n}</div></div>`).join('')}</div>
+    <div class="table-card" style="padding:20px"><div class="table-title" style="margin-bottom:14px">Por tipo de produto</div>${Object.entries(byT).map(([t,n])=>`<div style="display:flex;align-items:center;gap:10px;margin-bottom:8px"><div style="width:120px;font-size:11px;color:var(--text2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${t}</div><div style="flex:1;height:6px;background:var(--bg3);border-radius:3px;overflow:hidden"><div style="width:${Math.round(n/total*100)}%;height:100%;background:var(--accent);border-radius:3px"></div></div><div style="width:24px;text-align:right;font-size:12px;color:var(--text2)">${n}</div></div>`).join('')}</div>
+  </div>
+  <div class="table-card">
+    <div class="table-header">
+      <div class="table-title">Todas as solicitações</div>
+    </div>
+    <!-- Filtros -->
+    <div style="padding:12px 16px;border-bottom:1px solid var(--border);display:flex;flex-wrap:wrap;gap:8px;align-items:center">
+      <input type="text" id="rep-busca" placeholder="Buscar por solicitante ou rota..." oninput="aplicarFiltrosRelatorio()"
+        style="padding:7px 12px;background:var(--bg3);border:1px solid var(--border);border-radius:7px;color:var(--text);font-size:12px;outline:none;flex:1;min-width:180px">
+      <select id="rep-status" onchange="aplicarFiltrosRelatorio()"
+        style="padding:7px 10px;background:var(--bg3);border:1px solid var(--border);border-radius:7px;color:var(--text2);font-size:12px;outline:none">
+        <option value="">Todos os status</option>
+        <option value="pending">Pendente</option>
+        <option value="bidding">Em licitação</option>
+        <option value="approved">Aprovado</option>
+        <option value="transit">Em trânsito</option>
+        <option value="done">Concluído</option>
+        <option value="rejected">Recusado</option>
+      </select>
+      <select id="rep-tipo" onchange="aplicarFiltrosRelatorio()"
+        style="padding:7px 10px;background:var(--bg3);border:1px solid var(--border);border-radius:7px;color:var(--text2);font-size:12px;outline:none">
+        <option value="">Todos os tipos</option>
+        <option value="spot">Frete Spot</option>
+        <option value="hub">Coleta em Hub</option>
+      </select>
+      <input type="date" id="rep-de" oninput="aplicarFiltrosRelatorio()"
+        style="padding:7px 10px;background:var(--bg3);border:1px solid var(--border);border-radius:7px;color:var(--text2);font-size:12px;outline:none">
+      <input type="date" id="rep-ate" oninput="aplicarFiltrosRelatorio()"
+        style="padding:7px 10px;background:var(--bg3);border:1px solid var(--border);border-radius:7px;color:var(--text2);font-size:12px;outline:none">
+      <button class="btn-ghost" onclick="limparFiltrosRelatorio()">Limpar filtros</button>
+      <button class="btn-secondary" onclick="exportCSV()">⬇ Exportar</button>
+    </div>
+    <div id="rep-tabela">${freteTable([...DB.fretes].reverse(),'relatorio')}</div>
+  </div>`;
+}
+
+function aplicarFiltrosRelatorio(){
+  const busca=(document.getElementById('rep-busca')?.value||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
+  const status=document.getElementById('rep-status')?.value||'';
+  const tipo=document.getElementById('rep-tipo')?.value||'';
+  const de=document.getElementById('rep-de')?.value||'';
+  const ate=document.getElementById('rep-ate')?.value||'';
+
+  let list=[...DB.fretes].reverse();
+  if(busca) list=list.filter(f=>{
+    const sol=(f.solicitanteNome||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
+    const rota=rotaResumo(f).toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
+    return sol.includes(busca)||rota.includes(busca);
+  });
+  if(status) list=list.filter(f=>f.status===status);
+  if(tipo) list=list.filter(f=>f.tipoFrete===tipo);
+  if(de) list=list.filter(f=>f.data>=de);
+  if(ate) list=list.filter(f=>f.data<=ate);
+
+  const el=document.getElementById('rep-tabela');
+  if(el) el.innerHTML=freteTable(list,'relatorio');
+}
+
+function limparFiltrosRelatorio(){
+  ['rep-busca','rep-status','rep-tipo','rep-de','rep-ate'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+  aplicarFiltrosRelatorio();
+}
+
+// ===================== TABLE =====================
+function freteTable(list,mode){
+  if(!list.length)return`<div class="empty-state"><div class="empty-icon">📭</div>Nenhum frete encontrado</div>`;
+  const hdrs={
+    gestor:['ID','Solicitante','Rota','Tipo','Perfil','Data','Status','Ações'],
+    licitacao:['ID','Rota','Tipo','Perfil','Data','Lances','Ações'],
+    solicitante:['ID','Rota','Tipo','Status','Transportador','Ações'],
+    disponivel:['ID','Rota','Tipo','Perfil','Data','Lance','Ações'],
+    transportador:['ID','Rota','Tipo','Status','Ações'],
+    relatorio:['ID','Solicitante','Rota','Tipo','Perfil','Status','Transportador','Valor','Data',''],
+  };
+  const rows=list.map(f=>{
+    const rota=rotaResumo(f);
+    const perfil=f.perfil?`<span style="font-size:18px" title="${PM[f.perfil]||''}">${PM[f.perfil]?.split(' ')[0]||''}</span>`:'—';
+    if(mode==='gestor')return`<tr>
+      <td style="font-family:monospace;font-size:11px;color:var(--text3)">#${f.id}</td>
+      <td class="tdm">${f.solicitanteNome}</td><td style="font-size:12px">${rota}</td>
+      <td style="font-size:12px">${f.tipoProduto||'—'}</td><td>${perfil}</td>
+      <td>${fmtDate(f.data)}</td>
+      <td>${badge(f.status)}</td>
+      <td>
+        <button class="action-btn view" onclick="verDetalhe('${f.id}')">Ver</button>
+        ${f.status==='pending'?`<button class="action-btn approve" onclick="aprovar('${f.id}')">✓</button><button class="action-btn reject" onclick="recusar('${f.id}')">✕</button>`:''}
+      </td></tr>`;
+    if(mode==='licitacao')return`<tr>
+      <td style="font-family:monospace;font-size:11px;color:var(--text3)">#${f.id}</td>
+      <td class="tdm" style="font-size:12px">${rota}</td>
+      <td style="font-size:12px">${f.tipoProduto||'—'}</td><td>${perfil}</td>
+      <td>${fmtDate(f.data)}</td>
+      <td><span style="font-size:13px;font-weight:600;color:${f.lances?.length?'var(--yellow)':'var(--text3)'}">${f.lances?.length||0} proposta(s)</span></td>
+      <td><button class="action-btn view" onclick="verDetalhe('${f.id}')">Ver propostas</button></td></tr>`;
+    if(mode==='solicitante')return`<tr>
+      <td style="font-family:monospace;font-size:11px;color:var(--text3)">#${f.id}</td>
+      <td class="tdm" style="font-size:12px">${rota}</td>
+      <td style="font-size:12px">${f.tipoProduto||'—'}</td>
+      <td>${badge(f.status)}</td>
+      <td style="font-size:12px">${f.transportadorNome||'—'}</td>
+      <td><button class="action-btn view" onclick="verDetalhe('${f.id}')">Acompanhar</button></td></tr>`;
+    if(mode==='disponivel'){
+      const jaDei=f.lances?.some(l=>l.transportadorId===currentUser.id);
+      return`<tr>
+        <td style="font-family:monospace;font-size:11px;color:var(--text3)">#${f.id}</td>
+        <td class="tdm" style="font-size:12px">${rota}</td>
+        <td style="font-size:12px">${f.tipoProduto||'—'}</td><td>${perfil}</td>
+        <td>${fmtDate(f.data)}</td>
+        <td>${jaDei?`<span style="color:var(--yellow);font-size:12px">✓ Proposta enviada</span>`:'—'}</td>
+        <td>
+          <button class="action-btn view" onclick="verDetalheTransp('${f.id}')">Ver detalhes</button>
+          ${!jaDei?`<button class="action-btn bid" onclick="abrirLance('${f.id}')">Fazer proposta</button>`:''}
+        </td></tr>`;
+    }
+    if(mode==='transportador')return`<tr>
+      <td style="font-family:monospace;font-size:11px;color:var(--text3)">#${f.id}</td>
+      <td class="tdm" style="font-size:12px">${rota}</td>
+      <td style="font-size:12px">${f.tipoProduto||'—'}</td>
+      <td>${badge(f.status)}</td>
+      <td>
+        <button class="action-btn view" onclick="verDetalhe('${f.id}')">Ver</button>
+        ${f.status==='transit'?`<button class="action-btn approve" onclick="abrirEntrega('${f.id}')">Confirmar entrega</button>`:''}
+      </td></tr>`;
+    if(mode==='relatorio')return`<tr>
+      <td style="font-family:monospace;font-size:11px;color:var(--text3)">${displayId(f.id)}</td>
+      <td>${f.solicitanteNome}</td><td style="font-size:12px">${rota}</td>
+      <td style="font-size:12px">${f.tipoProduto||'—'}</td><td>${perfil}</td>
+      <td>${badge(f.status)}</td><td>${f.transportadorNome||'—'}</td>
+      <td>${f.valor?'R$'+parseFloat(f.valor).toLocaleString('pt-BR'):'—'}</td>
+      <td>${fmtDate(f.data)}</td>
+      <td><button class="action-btn view" onclick="${f.tipoFrete==='hub'?`verDetalheHub('${f.id}')`:`verDetalhe('${f.id}')`}">Ver</button></td></tr>`;
+    return'';
+  }).join('');
+  return`<table><thead><tr>${hdrs[mode].map(h=>`<th>${h}</th>`).join('')}</tr></thead><tbody>${rows}</tbody></table>`;
+}
+
+// ===================== SOLICITAÇÃO =====================
+function abrirSolicitacao(prefixGestor=false){
+  const isGestor = currentUser?.role === 'gestor';
+  uploadedFoto=null;pontosState=[];pontoCount=0;curPerfil=null;
+  // Limpa previews que existem
+  const fp=document.getElementById('file-foto-preview');if(fp)fp.innerHTML='';
+  document.getElementById('step-tipo').style.display='block';
+  document.getElementById('step-form').style.display='none';
+  document.getElementById('modal-sol-footer').style.display='none';
+  document.getElementById('modal-sol-title').textContent='Nova solicitação';
+  document.querySelectorAll('.tipo-card').forEach(c=>c.classList.remove('selected'));
+  document.querySelectorAll('.perfil-card').forEach(c=>c.classList.remove('selected'));
+  document.getElementById('rec-correios').classList.remove('show');
+  document.getElementById('rec-transp').classList.remove('show');
+  // Limpa listas de coletas/entregas
+  const cl=document.getElementById('coletas-list');if(cl)cl.innerHTML='';
+  const el=document.getElementById('entregas-list');if(el)el.innerHTML='';
+  const rp=document.getElementById('roteiro-preview');if(rp)rp.style.display='none';
+  ['s-tipo','s-obs'].forEach(id=>{const el=document.getElementById(id);if(el)el.value=''});
+  const sh=document.getElementById('step-hub');if(sh)sh.style.display='none';
+  window._solAutoApprove=false;
+  openModal('modal-solicitar');
+  if(prefixGestor || isGestor) selecionarTipo('spot', true);
+}
+
+function selecionarTipo(tipo, autoApprove=false){
+  document.getElementById('step-tipo').style.display='none';
+  document.getElementById('step-form').style.display= tipo==='spot'?'block':'none';
+  document.getElementById('step-hub').style.display= tipo==='hub'?'block':'none';
+  document.getElementById('modal-sol-footer').style.display='flex';
+  window._solTipo=tipo;
+  window._solAutoApprove=autoApprove;
+  if(tipo==='hub'){
+    document.getElementById('modal-sol-title').textContent='Coleta em Hub';
+    document.getElementById('modal-sol-btn').textContent='Enviar solicitação';
+    document.getElementById('modal-sol-btn').onclick=submitHubSolicitacao;
+    initHubForm();
+  } else {
+    document.getElementById('modal-sol-title').textContent=autoApprove?'Novo frete (gestor)':'Frete Spot — nova solicitação';
+    document.getElementById('modal-sol-btn').textContent=autoApprove?'Criar frete (aprovação automática)':'Enviar solicitação';
+    document.getElementById('modal-sol-btn').onclick=submitSolicitacao;
+    addPonto('coleta');addPonto('entrega');
+  }
+}
+
+function voltarTipo(){
+  document.getElementById('step-tipo').style.display='block';
+  document.getElementById('step-form').style.display='none';
+  document.getElementById('step-hub').style.display='none';
+  document.getElementById('modal-sol-footer').style.display='none';
+}
+
+// PERFIL
+let curPerfil=null;
+function selecionarPerfil(p){
+  curPerfil=p;
+  document.querySelectorAll('.perfil-card').forEach(c=>c.classList.remove('selected'));
+  document.getElementById('perfil-'+p).classList.add('selected');
+  document.getElementById('rec-correios').classList.toggle('show',p==='envelope'||p==='caixa');
+  document.getElementById('rec-transp').classList.toggle('show',p==='volumes'||p==='pallet');
+}
+
+// PONTOS — blocos separados coleta/entrega, campos de carga por coleta
+let pontoCount=0;
+function addPonto(tipo){
+  const id=++pontoCount;
+  pontosState.push({id,tipo,filial:null,filialData:null,volumes:'',peso:'',descricao:'',nfFile:null,nfNome:null});
+  renderPontos();
+}
+function removePonto(id){
+  pontosState=pontosState.filter(p=>p.id!==id);
+  renderPontos();
+}
+
+function renderPontos(){
+  const coletas=pontosState.filter(p=>p.tipo==='coleta');
+  const entregas=pontosState.filter(p=>p.tipo==='entrega');
+
+  function renderItem(p, idx, total, tipo){
+    const num=idx+1;
+    const cor=tipo==='coleta'?'var(--blue)':'var(--green)';
+    const corDim=tipo==='coleta'?'var(--blue-dim)':'var(--green-dim)';
+    const letra=tipo==='coleta'?'C':'E';
+    const canRemove=total>1;
+
+    const coletaExtra = tipo==='coleta' ? `
+      <div style="margin-top:10px">
+        <div class="field" style="margin:0 0 8px">
+          <label>Descrição da mercadoria</label>
+          <input type="text" id="pdesc-${p.id}" value="${p.descricao||''}" placeholder="ex: 8 caixas de peças eletrônicas" oninput="pontosState.find(x=>x.id===${p.id}).descricao=this.value">
+        </div>
+        <div>
+          <label style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.4px;color:var(--text2);display:block;margin-bottom:5px">Nota Fiscal / Documento *</label>
+          ${p.nfNome
+            ? `<div class="uploaded-file" style="margin:0"><span>📄</span><span class="file-name">${p.nfNome}</span><span class="file-remove" onclick="removerNFColeta(${p.id})">✕</span></div>`
+            : `<div class="upload-area" style="padding:10px" onclick="document.getElementById('nf-coleta-${p.id}').click()">
+                <span style="font-size:16px">📄</span>
+                <p style="font-size:11px">Clique para anexar NF ou nota de transferência</p>
+              </div>
+              <input type="file" id="nf-coleta-${p.id}" style="display:none" accept=".pdf,.jpg,.jpeg,.png" onchange="handleNFColeta(event,${p.id})">`
+          }
+        </div>
+      </div>` : '';
+
+    return `<div style="background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius);padding:14px;margin-bottom:8px;position:relative">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
+        <div style="width:22px;height:22px;border-radius:50%;background:${corDim};border:1px solid ${cor};display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:${cor};flex-shrink:0">${letra}${num}</div>
+        <div style="font-size:11px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;color:${cor};flex:1">${tipo==='coleta'?'Coleta':'Entrega'} ${num}</div>
+        ${canRemove?`<button onclick="removePonto(${p.id})" style="font-size:13px;color:var(--text3);cursor:pointer;padding:2px 6px;border-radius:4px;transition:var(--t)" onmouseover="this.style.color='var(--red)'" onmouseout="this.style.color='var(--text3)'">✕</button>`:''}
+      </div>
+      <div class="filial-picker" id="fpicker-${p.id}">
+        <input type="text" placeholder="Buscar filial..." autocomplete="off"
+          oninput="fpFilter(${p.id},this.value)"
+          onfocus="fpFilter(${p.id},this.value)"
+          onblur="setTimeout(()=>fpClose(${p.id}),180)"
+          value="${p.filial||''}" id="finput-${p.id}">
+        <div class="filial-dropdown" id="fdd-${p.id}"></div>
+      </div>
+      <div class="filial-selected-card ${p.filialData?'show':''}" id="fcard-${p.id}">
+        ${p.filialData?`<div class="fsc-nome">📍 ${p.filialData.nome}</div><div class="fsc-end">${p.filialData.endereco} — CEP ${p.filialData.cep}</div>`:''}
+      </div>
+      ${coletaExtra}
+    </div>`;
+  }
+
+  document.getElementById('coletas-list').innerHTML =
+    coletas.length
+      ? coletas.map((p,i)=>renderItem(p,i,coletas.length,'coleta')).join('')
+      : `<div style="padding:12px;background:var(--bg3);border:1px dashed var(--border2);border-radius:var(--radius);text-align:center;font-size:12px;color:var(--text3)">Nenhuma coleta adicionada</div>`;
+
+  document.getElementById('entregas-list').innerHTML =
+    entregas.length
+      ? entregas.map((p,i)=>renderItem(p,i,entregas.length,'entrega')).join('')
+      : `<div style="padding:12px;background:var(--bg3);border:1px dashed var(--border2);border-radius:var(--radius);text-align:center;font-size:12px;color:var(--text3)">Nenhuma entrega adicionada</div>`;
+
+  atualizarRoteiro();
+}
+
+function handleNFColeta(e, pontoId){
+  const file=e.target.files[0];if(!file)return;
+  const p=pontosState.find(x=>x.id===pontoId);
+  if(p){p.nfFile=file;p.nfNome=file.name}
+  renderPontos();
+}
+function removerNFColeta(pontoId){
+  const p=pontosState.find(x=>x.id===pontoId);
+  if(p){p.nfFile=null;p.nfNome=null}
+  renderPontos();
+}
+
+function fpFilter(pontoId,q){
+  const dd=document.getElementById('fdd-'+pontoId);
+  if(!q){dd.classList.remove('open');dd.innerHTML='';return}
+  const qn=q.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
+  const res=FILIAIS.filter(f=>{
+    const n=f.nome.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
+    const c=f.cidade.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
+    return n.includes(qn)||c.includes(qn);
+  }).slice(0,10);
+  if(!res.length){dd.innerHTML='<div style="padding:10px 14px;font-size:13px;color:var(--text3)">Nenhuma filial encontrada</div>';dd.classList.add('open');return}
+  dd.innerHTML=res.map(f=>`<div class="filial-opt" onmousedown="fpSelect(${pontoId},${FILIAIS.indexOf(f)})">
+    <div class="filial-opt-nome">${f.nome}<span class="fbadge ${f.tipo.toLowerCase()}">${f.tipo}</span></div>
+    <div class="filial-opt-end">${f.endereco} — ${f.cidade}</div>
+  </div>`).join('');
+  dd.classList.add('open');
+}
+
+function fpSelect(pontoId,idx){
+  const f=FILIAIS[idx];
+  const p=pontosState.find(x=>x.id===pontoId);
+  if(p){p.filial=f.nome;p.filialData=f}
+  document.getElementById('finput-'+pontoId).value=f.nome;
+  document.getElementById('fdd-'+pontoId).classList.remove('open');
+  const card=document.getElementById('fcard-'+pontoId);
+  card.classList.add('show');
+  card.innerHTML=`<div class="fsc-nome">📍 ${f.nome}</div><div class="fsc-end">${f.endereco} — CEP ${f.cep}</div>`;
+  atualizarRoteiro();
+}
+
+function fpClose(pontoId){document.getElementById('fdd-'+pontoId)?.classList.remove('open')}
+
+function atualizarRoteiro(){
+  const preenchidos=pontosState.filter(p=>p.filialData);
+  const prev=document.getElementById('roteiro-preview');
+  const lista=document.getElementById('roteiro-lista');
+  if(preenchidos.length>=2){
+    prev.style.display='block';
+    lista.innerHTML=preenchidos.map(p=>`<div class="roteiro-item">
+      <div class="roteiro-dot ${p.tipo==='coleta'?'c':'e'}">${p.tipo==='coleta'?'C':'E'}</div>
+      <div class="roteiro-info"><div class="rn">${p.filialData.nome}</div><div class="ra">${p.filialData.endereco} — ${p.filialData.cidade}</div></div>
+    </div>`).join('');
+  }else{prev.style.display='none'}
+}
+
+async function submitSolicitacao(){
+  const coletas=pontosState.filter(p=>p.tipo==='coleta'&&p.filialData);
+  const entregas=pontosState.filter(p=>p.tipo==='entrega'&&p.filialData);
+
+  if(!curPerfil){showToast('Selecione o perfil da carga','error');return}
+  if(!coletas.length){showToast('Selecione ao menos um ponto de coleta','error');return}
+  if(!entregas.length){showToast('Selecione ao menos um ponto de entrega','error');return}
+  for(const c of coletas){
+    if(!c.nfNome){showToast(`Anexe o documento (NF) em "${c.filialData.nome}"`, 'error');return}
+  }
+  const tipo=document.getElementById('s-tipo').value;
+  const data=document.getElementById('s-data').value;
+  if(!tipo||!data){showToast('Preencha tipo de produto e data necessária','error');return}
+
+  showToast('Enviando...','info');
+
+  // Upload das NFs por coleta
+  const pontosComUpload = await Promise.all([
+    ...coletas.map(async p=>{
+      let nfId='', nfUrl='';
+      if(p.nfFile){
+        const ur=await uploadArquivo(p.nfFile);
+        if(ur.ok){nfId=ur.fileId;nfUrl=ur.url;}
+      }
+      return {tipo:'coleta',filial:p.filialData.nome,endereco:p.filialData.endereco,cep:p.filialData.cep,cidade:p.filialData.cidade,descricao:p.descricao||'',nfNome:p.nfNome,nfId,nfUrl};
+    }),
+    ...entregas.map(async p=>({tipo:'entrega',filial:p.filialData.nome,endereco:p.filialData.endereco,cep:p.filialData.cep,cidade:p.filialData.cidade}))
+  ]);
+
+  // Upload da foto geral (opcional)
+  let fotoNome='', fotoId='';
+  if(uploadedFoto){
+    const uf=await uploadArquivo(uploadedFoto);
+    if(uf.ok){fotoNome=uploadedFoto.name;fotoId=uf.fileId;}
+  }
+
+  const auto = window._solAutoApprove || currentUser?.role === 'gestor';
+  const regra=!auto&&DB.regras.find(r=>(!r.tipo||r.tipo===tipo)&&(!r.perfil||r.perfil===curPerfil));
+  let status='pending',transportadorId=null,transportadorNome=null;
+  if(auto){status='bidding'}
+  else if(regra){status='transit';transportadorId=regra.transportadorId;transportadorNome=regra.transportadorNome}
+
+  const r=await api('criarFrete',{
+    tipoFrete:'spot',
+    solicitanteId:currentUser.id,
+    solicitanteNome:currentUser.name,
+    solicitanteEmail:currentUser.email||'',
+    pontos:pontosComUpload,
+    tipoProduto:tipo, perfil:curPerfil,
+    peso:document.getElementById('s-peso')?.value||'',
+    dimensoes:document.getElementById('s-dimensoes')?.value||'',
+    obs:document.getElementById('s-obs').value,
+    fotoNome, fotoId, data, status, transportadorId, transportadorNome,
+    eventoInicial:auto?'Criado pelo gestor':regra?'Alocação automática aplicada':'Solicitado'
+  });
+
+  if(!r.ok){showToast(r.error||'Erro ao criar frete','error');return}
+
+  // Atualiza local
+  const frete={
+    id:r.id, tipoFrete:'spot', solicitanteId:currentUser.id, solicitanteNome:currentUser.name, solicitanteEmail:currentUser.email||'',
+    pontos:pontosComUpload, tipoProduto:tipo, perfil:curPerfil,
+    peso:document.getElementById('s-peso')?.value||'', dimensoes:document.getElementById('s-dimensoes')?.value||'',
+    obs:document.getElementById('s-obs').value, fotoNome, fotoId, data, status, transportadorId, transportadorNome, valor:null,
+    createdAt:new Date().toISOString().slice(0,10), lances:[],
+    timeline:[{ev:auto?'Criado pelo gestor':regra?'Alocação automática aplicada':'Solicitado',t:now()}]
+  };
+  if(regra)frete.timeline.push({ev:`Transportador atribuído: ${transportadorNome}`,t:now()});
+  if(auto)frete.timeline.push({ev:'Aberto para propostas',t:now()});
+  DB.fretes.push(frete);
+
+  uploadedFoto=null;curPerfil=null;pontosState=[];pontoCount=0;
+  closeModal('modal-solicitar');
+  const msg=auto?'Frete criado e aberto para propostas!':regra?`Alocado para ${transportadorNome}`:'Solicitação enviada! Aguardando aprovação.';
+  showToast(msg,'success');
+  setupSidebar();go(curPage);
+}
+
+// ===================== APROVAÇÃO =====================
+async function aprovar(id){
+  const f=DB.fretes.find(x=>x.id===id);
+  const regra=DB.regras.find(r=>(!r.tipo||r.tipo===f.tipoProduto)&&(!r.perfil||r.perfil===f.perfil));
+  if(regra){
+    await api('atualizarFrete',{freteId:id,status:'transit',transportadorId:regra.transportadorId,transportadorNome:regra.transportadorNome,evento:`Aprovado — alocado para ${regra.transportadorNome}`});
+    f.status='transit';f.transportadorId=regra.transportadorId;f.transportadorNome=regra.transportadorNome;
+    f.timeline.push({ev:`Aprovado — alocado para ${regra.transportadorNome}`,t:now()});
+    showToast(`Aprovado e alocado para ${regra.transportadorNome}!`,'success');
+  }else{
+    await api('atualizarFrete',{freteId:id,status:'bidding',evento:'Aprovado — aberto para propostas'});
+    f.status='bidding';
+    f.timeline.push({ev:'Aprovado — aberto para propostas',t:now()});
+    showToast('Aprovado! Aberto para propostas.','success');
+  }
+  setupSidebar();go(curPage);
+}
+
+async function reativarFrete(id){
+  await api('atualizarFrete',{freteId:id,status:'pending',evento:'Reativado pelo gestor'});
+  const f=DB.fretes.find(x=>x.id===id);
+  f.status='pending'; delete f.rejectReason;
+  f.timeline=f.timeline||[]; f.timeline.push({ev:'Reativado pelo gestor',t:now()});
+  closeModal('modal-detalhe');
+  showToast('Solicitação reativada — voltou para pendentes','info');
+  setupSidebar();go(curPage);
+}
+
+async function recusar(id){
+  const motivo=prompt('Motivo da recusa (opcional):')||'';
+  await api('atualizarFrete',{freteId:id,status:'rejected',motivoRecusa:motivo,evento:'Recusado',eventoObs:motivo});
+  const f=DB.fretes.find(x=>x.id===id);
+  f.status='rejected';f.rejectReason=motivo;
+  f.timeline=f.timeline||[];f.timeline.push({ev:'Recusado',obs:motivo,t:now()});
+  showToast('Frete recusado','error');setupSidebar();go(curPage);
+}
+
+// ===================== LANCES =====================
+function abrirLance(id){
+  currentFreteId=id;
+  const f=DB.fretes.find(x=>x.id===id);
+  document.getElementById('lance-frete-resumo').innerHTML=`<strong>${rotaResumo(f)}</strong><br>${f.tipoProduto||''} ${f.perfil?'• '+PM[f.perfil]:''} • Data ideal de coleta: ${fmtDate(f.data)}`;
+  document.getElementById('lance-prazo').value=f.data||'';
+  document.getElementById('lance-valor').value='';
+  document.getElementById('lance-obs').value='';
+  openModal('modal-lance');
+}
+
+async function submitLance(){
+  const valor=document.getElementById('lance-valor').value;
+  const prazo=document.getElementById('lance-prazo').value;
+  if(!valor||!prazo){showToast('Preencha valor e prazo','error');return}
+  const r = await api('adicionarLance',{
+    freteId:currentFreteId, transportadorId:currentUser.id,
+    transportadorNome:currentUser.name, valor:parseFloat(valor), prazo,
+    obs:document.getElementById('lance-obs').value
+  });
+  if(!r.ok){showToast(r.error||'Erro ao enviar proposta','error');return}
+  // Atualiza local
+  const f=DB.fretes.find(x=>x.id===currentFreteId);
+  if(f){f.lances=f.lances||[];f.lances.push({transportadorId:currentUser.id,transportadorNome:currentUser.name,valor:parseFloat(valor),prazo,obs:document.getElementById('lance-obs').value,criadoEm:now()});}
+  closeModal('modal-lance');showToast('Proposta enviada!','success');go(curPage);
+}
+
+async function escolherLance(freteId,transportadorId){
+  const f=DB.fretes.find(x=>x.id===freteId);
+  if(!f){showToast('Frete não encontrado','error');return}
+  const lance=f.lances?.find(l=>l.transportadorId===transportadorId);
+  if(!lance){showToast('Proposta não encontrada','error');return}
+  await api('atualizarFrete',{freteId, status:'transit', transportadorId, transportadorNome:lance.transportadorNome, valor:lance.valor, evento:`Proposta aceita: ${lance.transportadorNome} — R$${lance.valor}`});
+  await api('atualizarFrete',{freteId, evento:'Em trânsito'});
+  f.transportadorId=transportadorId;f.transportadorNome=lance.transportadorNome;
+  f.valor=lance.valor;f.status='transit';
+  f.timeline=f.timeline||[];
+  f.timeline.push({ev:`Proposta aceita: ${lance.transportadorNome} — R$${lance.valor}`,t:now()});
+  f.timeline.push({ev:'Em trânsito',t:now()});
+  closeModal('modal-detalhe');showToast(`Transportador escolhido: ${lance.transportadorNome}`,'success');
+  setupSidebar();go(curPage);
+}
+
+// ===================== ENTREGA =====================
+function abrirEntrega(id){
+  currentFreteId=id;
+  document.getElementById('ent-data').value=new Date().toISOString().slice(0,10);
+  ['ent-chave','ent-obs'].forEach(x=>document.getElementById(x).value='');
+  openModal('modal-entrega');
+}
+async function confirmarEntrega(){
+  const dataEntrega=document.getElementById('ent-data').value;
+  const pagForma=document.getElementById('ent-forma').value;
+  const pagChave=document.getElementById('ent-chave').value;
+  await api('atualizarFrete',{freteId:currentFreteId, status:'done', dataEntrega, pagForma, pagChave, evento:'Entregue'});
+  const f=DB.fretes.find(x=>x.id===currentFreteId);
+  if(f){f.status='done';f.dataEntrega=dataEntrega;f.pagForma=pagForma;f.pagChave=pagChave;f.timeline=f.timeline||[];f.timeline.push({ev:'Entregue',t:now()});}
+  closeModal('modal-entrega');showToast('Entrega confirmada!','success');go(curPage);
+}
+
+// ===================== DETALHE =====================
+function verDetalhe(id){
+  const f=DB.fretes.find(x=>x.id===id);if(!f)return;
+  document.getElementById('modal-det-title').textContent=`Frete ${displayId(f.id)}`;
+  const body=document.getElementById('modal-det-body');
+
+  // Coletas com detalhes da carga
+  const coletas=f.pontos?.filter(p=>p.tipo==='coleta')||[];
+  const entregas=f.pontos?.filter(p=>p.tipo==='entrega')||[];
+
+  const roteiroHtml=`<div style="margin-bottom:16px">
+    <div class="form-section-title">Roteiro</div>
+    ${coletas.length?`<div style="font-size:11px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;color:var(--blue);margin:8px 0 6px">Coletas</div>
+    ${coletas.map((p,i)=>`<div style="background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:12px;margin-bottom:6px">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
+        <div style="width:20px;height:20px;border-radius:50%;background:var(--blue-dim);border:1px solid var(--blue);display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;color:var(--blue);flex-shrink:0">C${i+1}</div>
+        <div style="font-weight:500;font-size:13px">${p.filial}</div>
+      </div>
+      <div style="font-size:12px;color:var(--text2);margin-bottom:6px">${p.endereco} — CEP ${p.cep} — ${p.cidade}</div>
+      <div style="display:flex;gap:16px;flex-wrap:wrap">
+        ${p.volumes?`<span style="font-size:12px;color:var(--text2)">📦 <strong style="color:var(--text)">${p.volumes}</strong> volumes</span>`:''}
+        ${p.peso?`<span style="font-size:12px;color:var(--text2)">⚖️ <strong style="color:var(--text)">${p.peso} kg</strong></span>`:''}
+        ${p.descricao?`<span style="font-size:12px;color:var(--text2)">📝 ${p.descricao}</span>`:''}
+      </div>
+      ${p.nfNome?`<div style="margin-top:6px;display:flex;align-items:center;gap:6px;font-size:11px;color:var(--accent)"><span>📄</span>${p.nfNome}</div>`:''}
+    </div>`).join('')}`:''}
+    ${entregas.length?`<div style="font-size:11px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;color:var(--green);margin:10px 0 6px">Entregas</div>
+    ${entregas.map((p,i)=>`<div style="background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:12px;margin-bottom:6px">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px">
+        <div style="width:20px;height:20px;border-radius:50%;background:var(--green-dim);border:1px solid var(--green);display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;color:var(--green);flex-shrink:0">E${i+1}</div>
+        <div style="font-weight:500;font-size:13px">${p.filial}</div>
+      </div>
+      <div style="font-size:12px;color:var(--text2)">${p.endereco} — CEP ${p.cep} — ${p.cidade}</div>
+    </div>`).join('')}`:''}
+  </div>`;
+
+  // Contato do solicitante (visível para gestor e transportador)
+  const solUser=DB.users.find(u=>u.id===f.solicitanteId);
+  const contatoSolicitante=`<div style="padding:12px 14px;background:var(--bg3);border:1px solid var(--border);border-radius:8px;margin-bottom:12px">
+    <div style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:var(--text3);margin-bottom:6px">Contato do solicitante</div>
+    <div style="font-size:13px;font-weight:500;margin-bottom:3px">${f.solicitanteNome}</div>
+    ${solUser?.email?`<div style="font-size:12px;color:var(--text2)">✉️ ${solUser.email}</div>`:''}
+    ${solUser?.tel?`<div style="font-size:12px;color:var(--text2)">📞 ${solUser.tel}</div>`:''}
+    ${solUser?.setor?`<div style="font-size:12px;color:var(--text3)">${solUser.setor}</div>`:''}
+  </div>`;
+
+  // Contato do transportador (visível para gestor e solicitante quando atribuído)
+  let contatoTransportador='';
+  if(f.transportadorId){
+    const tUser=DB.users.find(u=>u.id===f.transportadorId);
+    contatoTransportador=`<div style="padding:12px 14px;background:var(--accent-dim2);border:1px solid rgba(0,177,49,.2);border-radius:8px;margin-bottom:12px">
+      <div style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:var(--text3);margin-bottom:6px">Contato do transportador</div>
+      <div style="font-size:13px;font-weight:500;margin-bottom:3px;color:var(--accent)">${f.transportadorNome}</div>
+      ${tUser?.tel?`<div style="font-size:12px;color:var(--text2)">📞 ${tUser.tel}</div>`:''}
+      ${tUser?.email?`<div style="font-size:12px;color:var(--text2)">✉️ ${tUser.email}</div>`:''}
+      ${tUser?.tipo?`<div style="font-size:12px;color:var(--text3)">${tUser.tipo}</div>`:''}
+      ${f.valor?`<div style="font-size:12px;color:var(--text2);margin-top:4px">Valor acordado: <strong style="color:var(--accent)">R$ ${parseFloat(f.valor).toLocaleString('pt-BR')}</strong></div>`:''}
+    </div>`;
+  }
+
+  // Lances (para gestor)
+  let lancesHtml='';
+  if(currentUser.role==='gestor'&&f.lances?.length){
+    const melhor=f.lances.reduce((a,b)=>b.valor<a.valor?b:a);
+    lancesHtml=`<div class="form-section-title" style="margin-top:16px">Propostas recebidas (${f.lances.length})</div>
+    ${f.lances.map(l=>`<div class="lance-card ${l.transportadorId===melhor.transportadorId?'winner':''}">
+      <div class="lance-header">
+        <div class="lance-transp">${l.transportadorNome}${l.transportadorId===melhor.transportadorId?` <span style="font-size:11px;color:var(--accent)">✓ Melhor valor</span>`:''}</div>
+        <div class="lance-valor">R$ ${l.valor.toLocaleString('pt-BR')}</div>
+      </div>
+      <div class="lance-details">
+        <div class="lance-detail"><label>Prazo</label><p>${fmtDate(l.prazo)}</p></div>
+        <div class="lance-detail"><label>Enviado em</label><p>${l.criadoEm}</p></div>
+        <div class="lance-detail"><label>Observações</label><p>${l.obs||'—'}</p></div>
+      </div>
+      ${f.status==='bidding'?`<div style="margin-top:10px"><button class="btn-accent" style="width:100%" onclick="escolherLance('${f.id}','${l.transportadorId}')">✓ Escolher esta proposta</button></div>`:''}
+    </div>`).join('')}`;
+  }
+
+  body.innerHTML=`
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px">${badge(f.status)}<span class="ftype-tag spot">🔀 Frete Spot</span><span style="font-size:12px;color:var(--text3)">${fmtDate(f.createdAt)}</span></div>
+    ${roteiroHtml}
+    <div class="detail-grid">
+      <div class="detail-item"><label>Tipo de produto</label><p>${f.tipoProduto||'—'}</p></div>
+      <div class="detail-item"><label>Perfil da carga</label><p>${f.perfil?PM[f.perfil]:'—'}</p></div>
+      <div class="detail-item"><label>Data ideal de coleta</label><p>${fmtDate(f.data)}</p></div>
+      ${f.peso?`<div class="detail-item"><label>Peso total</label><p>${f.peso} kg</p></div>`:''}
+      ${f.dimensoes?`<div class="detail-item"><label>Dimensões</label><p>${f.dimensoes}</p></div>`:''}
+    </div>
+    ${f.obs?`<div style="padding:10px 12px;background:var(--bg3);border-radius:8px;margin-bottom:12px;font-size:13px;color:var(--text2)">${f.obs}</div>`:''}
+    ${f.fotoNome?`<div style="display:flex;align-items:center;gap:8px;padding:8px 12px;background:var(--bg3);border:1px solid var(--border);border-radius:8px;margin-bottom:12px"><span>📷</span><span style="font-size:12px;font-weight:500">${f.fotoNome}</span></div>`:''}
+    ${currentUser.role!=='gestor'?contatoSolicitante:''}
+    ${contatoTransportador}
+    ${currentUser.role==='gestor'?contatoSolicitante:''}
+    ${lancesHtml}
+    <div class="form-section-title" style="margin-top:16px">Histórico</div>
+    <div class="timeline">${(f.timeline||[]).map(t=>`<div class="tl-item"><div class="tl-dot done"></div><div><div class="tl-title">${t.ev}${t.obs?` — <span style="color:var(--text3)">${t.obs}</span>`:''}</div><div class="tl-time">${t.t}</div></div></div>`).join('')}</div>`;
+
+  const footer=document.getElementById('modal-det-footer');
+  footer.innerHTML='<button class="btn-secondary" onclick="closeModal(\'modal-detalhe\')">Fechar</button>';
+  if(currentUser.role==='gestor'){
+    if(f.status==='pending')footer.innerHTML+=`<button class="btn-secondary" style="color:var(--red)" onclick="closeModal('modal-detalhe');recusar('${f.id}')">Recusar</button><button class="btn-accent" onclick="closeModal('modal-detalhe');aprovar('${f.id}')">✓ Aprovar</button>`;
+    if(f.status==='rejected')footer.innerHTML+=`<button class="btn-secondary" style="color:var(--yellow);border-color:rgba(245,197,24,.3)" onclick="reativarFrete('${f.id}')">↩ Reativar</button>`;
+    if(f.status==='bidding'||f.status==='approved'){
+      const btnLink=document.createElement('button');
+      btnLink.className='btn-secondary';btnLink.innerHTML='🔗 Copiar link';btnLink.style.marginRight='auto';
+      btnLink.onclick=()=>{closeModal('modal-detalhe');abrirLink(f.id)};
+      footer.insertBefore(btnLink,footer.firstChild);
+    }
+  }
+  openModal('modal-detalhe');
+}
+
+function verDetalheTransp(id){
+  const f=DB.fretes.find(x=>x.id===id);if(!f)return;
+  document.getElementById('modal-det-title').textContent=`Frete ${displayId(f.id)}`;
+  const body=document.getElementById('modal-det-body');
+
+  const coletas=f.pontos?.filter(p=>p.tipo==='coleta')||[];
+  const entregas=f.pontos?.filter(p=>p.tipo==='entrega')||[];
+  const solUser=DB.users.find(u=>u.id===f.solicitanteId);
+
+  body.innerHTML=`
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px">${badge(f.status)}</div>
+
+    <div class="form-section-title">Coletas</div>
+    ${coletas.map((p,i)=>`<div style="background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:12px;margin-bottom:6px">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
+        <div style="width:20px;height:20px;border-radius:50%;background:var(--blue-dim);border:1px solid var(--blue);display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;color:var(--blue)">C${i+1}</div>
+        <div style="font-weight:500;font-size:13px">${p.filial}</div>
+      </div>
+      <div style="font-size:12px;color:var(--text2);margin-bottom:6px">${p.endereco} — CEP ${p.cep} — ${p.cidade}</div>
+      <div style="display:flex;gap:14px;flex-wrap:wrap">
+        ${p.volumes?`<span style="font-size:12px">📦 <strong>${p.volumes}</strong> volumes</span>`:''}
+        ${p.peso?`<span style="font-size:12px">⚖️ <strong>${p.peso} kg</strong></span>`:''}
+        ${p.descricao?`<span style="font-size:12px;color:var(--text2)">📝 ${p.descricao}</span>`:''}
+      </div>
+      ${p.nfNome?`<div style="margin-top:6px;display:flex;align-items:center;gap:6px;font-size:11px;color:var(--accent)">📄 ${p.nfNome}</div>`:''}
+    </div>`).join('')}
+
+    <div class="form-section-title" style="margin-top:12px">Entregas</div>
+    ${entregas.map((p,i)=>`<div style="background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:12px;margin-bottom:6px">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px">
+        <div style="width:20px;height:20px;border-radius:50%;background:var(--green-dim);border:1px solid var(--green);display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;color:var(--green)">E${i+1}</div>
+        <div style="font-weight:500;font-size:13px">${p.filial}</div>
+      </div>
+      <div style="font-size:12px;color:var(--text2)">${p.endereco} — CEP ${p.cep} — ${p.cidade}</div>
+    </div>`).join('')}
+
+    <div style="margin-top:14px;padding:12px 14px;background:var(--bg3);border:1px solid var(--border);border-radius:8px">
+      <div style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:var(--text3);margin-bottom:6px">Contato do solicitante</div>
+      <div style="font-size:13px;font-weight:500;margin-bottom:3px">${f.solicitanteNome}</div>
+      ${solUser?.email?`<div style="font-size:12px;color:var(--text2)">✉️ ${solUser.email}</div>`:''}
+      ${solUser?.tel?`<div style="font-size:12px;color:var(--text2)">📞 ${solUser.tel}</div>`:''}
+      ${solUser?.setor?`<div style="font-size:12px;color:var(--text3)">${solUser.setor}</div>`:''}
+    </div>
+
+    <div class="detail-grid" style="margin-top:12px">
+      <div class="detail-item"><label>Tipo</label><p>${f.tipoProduto||'—'}</p></div>
+      <div class="detail-item"><label>Perfil</label><p>${f.perfil?PM[f.perfil]:'—'}</p></div>
+      <div class="detail-item"><label>Data ideal de coleta</label><p>${fmtDate(f.data)}</p></div>
+      ${f.peso?`<div class="detail-item"><label>Peso total</label><p>${f.peso} kg</p></div>`:''}
+      ${f.dimensoes?`<div class="detail-item"><label>Dimensões</label><p>${f.dimensoes}</p></div>`:''}
+    </div>
+    ${f.obs?`<div style="padding:10px 12px;background:var(--bg3);border-radius:8px;margin-top:8px;font-size:13px;color:var(--text2)">${f.obs}</div>`:''}
+    ${f.fotoNome?`<div style="margin-top:8px;padding:8px 12px;background:var(--bg3);border:1px solid var(--border);border-radius:8px;display:flex;align-items:center;gap:8px"><span>📷</span><span style="font-size:12px">${f.fotoNome}</span></div>`:''}`;
+
+  const footer=document.getElementById('modal-det-footer');
+  const jaDei=f.lances?.some(l=>l.transportadorId===currentUser.id);
+  footer.innerHTML=`<button class="btn-secondary" onclick="closeModal('modal-detalhe')">Fechar</button>${!jaDei?`<button class="btn-accent" onclick="closeModal('modal-detalhe');abrirLance('${f.id}')">Fazer proposta</button>`:'<span style="color:var(--accent);font-size:13px">✓ Proposta já enviada</span>'}`;
+  openModal('modal-detalhe');
+}
+
+// ===================== TRANSPORTADOR =====================
+// ===================== ESTADOS =====================
+const ESTADOS = [
+  {uf:'AC',nome:'Acre'},{uf:'AL',nome:'Alagoas'},{uf:'AP',nome:'Amapá'},
+  {uf:'AM',nome:'Amazonas'},{uf:'BA',nome:'Bahia'},{uf:'CE',nome:'Ceará'},
+  {uf:'DF',nome:'Distrito Federal'},{uf:'ES',nome:'Espírito Santo'},{uf:'GO',nome:'Goiás'},
+  {uf:'MA',nome:'Maranhão'},{uf:'MT',nome:'Mato Grosso'},{uf:'MS',nome:'Mato Grosso do Sul'},
+  {uf:'MG',nome:'Minas Gerais'},{uf:'PA',nome:'Pará'},{uf:'PB',nome:'Paraíba'},
+  {uf:'PR',nome:'Paraná'},{uf:'PE',nome:'Pernambuco'},{uf:'PI',nome:'Piauí'},
+  {uf:'RJ',nome:'Rio de Janeiro'},{uf:'RN',nome:'Rio Grande do Norte'},{uf:'RS',nome:'Rio Grande do Sul'},
+  {uf:'RO',nome:'Rondônia'},{uf:'RR',nome:'Roraima'},{uf:'SC',nome:'Santa Catarina'},
+  {uf:'SP',nome:'São Paulo'},{uf:'SE',nome:'Sergipe'},{uf:'TO',nome:'Tocantins'},
+];
+
+function renderEstadosGrid(containerId, selecionados=[]){
+  const el=document.getElementById(containerId);
+  if(!el)return;
+  el.innerHTML=ESTADOS.map(e=>`
+    <label class="estado-item ${selecionados.includes(e.uf)?'ativo':''}" id="${containerId}-${e.uf}">
+      <input type="checkbox" value="${e.uf}" ${selecionados.includes(e.uf)?'checked':''}
+        onchange="this.closest('.estado-item').classList.toggle('ativo',this.checked)">
+      <span>${e.uf} — ${e.nome}</span>
+    </label>`).join('');
+}
+
+function getEstadosSelecionados(containerId){
+  const el=document.getElementById(containerId);
+  if(!el)return[];
+  return [...el.querySelectorAll('input[type=checkbox]:checked')].map(i=>i.value);
+}
+
+function toggleTodosEstados(containerId){
+  const el=document.getElementById(containerId);
+  if(!el)return;
+  const checkboxes=el.querySelectorAll('input[type=checkbox]');
+  const todosAtivos=[...checkboxes].every(c=>c.checked);
+  checkboxes.forEach(c=>{
+    c.checked=!todosAtivos;
+    c.closest('.estado-item').classList.toggle('ativo',!todosAtivos);
+  });
+}
+
+function abrirCadastroTransportador(){
+  openModal('modal-transp-cad');
+  // Inicializa grid de estados após o modal abrir
+  setTimeout(()=>renderEstadosGrid('tc-estados'), 50);
+}
+
+async function cadastrarTransportador(){
+  const nome=document.getElementById('tc-nome').value.trim();
+  const email=document.getElementById('tc-email').value.trim();
+  const pass=document.getElementById('tc-pass').value;
+  if(!nome||!email||!pass){showToast('Preencha os campos obrigatórios','error');return}
+  const estados=getEstadosSelecionados('tc-estados');
+  const r=await api('cadastrarTransportador',{
+    nome, email, senha:pass,
+    tipo:document.getElementById('tc-tipo').value,
+    doc:document.getElementById('tc-doc').value,
+    tel:document.getElementById('tc-tel').value,
+    estados
+  });
+  if(!r.ok){showToast(r.error||'Erro ao cadastrar','error');return}
+  DB.users.push({id:r.id||'u'+Date.now(),name:nome,email,pass,role:'transportador',tipo:document.getElementById('tc-tipo').value,doc:document.getElementById('tc-doc').value,tel:document.getElementById('tc-tel').value,estados});
+  closeModal('modal-transp-cad');showToast('Transportador cadastrado!','success');go(curPage);
+}
+
+// ===================== UPLOAD =====================
+function handleDrag(e,tipo){e.preventDefault();document.getElementById('ua-'+tipo).classList.add('dragover')}
+function handleDrop(e,tipo){e.preventDefault();document.getElementById('ua-'+tipo).classList.remove('dragover');if(e.dataTransfer.files[0])setFile(e.dataTransfer.files[0],tipo)}
+function handleFile(e,tipo){if(e.target.files[0])setFile(e.target.files[0],tipo)}
+function setFile(file,tipo){
+  if(tipo==='nf')uploadedNF=file;else uploadedFoto=file;
+  const sz=file.size>1024*1024?(file.size/1024/1024).toFixed(1)+' MB':Math.round(file.size/1024)+' KB';
+  document.getElementById('file-'+tipo+'-preview').innerHTML=`<div class="uploaded-file"><span>${tipo==='nf'?'📄':'📷'}</span><span class="file-name">${file.name}</span><span class="file-size">${sz}</span><span class="file-remove" onclick="clearFile('${tipo}')">✕</span></div>`;
+}
+function clearFile(tipo){
+  if(tipo==='nf')uploadedNF=null;else uploadedFoto=null;
+  document.getElementById('file-'+tipo+'-preview').innerHTML='';
+  document.getElementById('file-'+tipo).value='';
+}
+
+// ===================== EXPORT =====================
+function exportCSV(){
+  const de=document.getElementById('rep-de')?.value;
+  const ate=document.getElementById('rep-ate')?.value;
+  let list=DB.fretes;
+  if(de)list=list.filter(f=>f.data>=de);
+  if(ate)list=list.filter(f=>f.data<=ate);
+  const hdr=['ID','Tipo de frete','Solicitante','Rota','Tipo produto','Perfil','Status','Transportador','Valor','Propostas','Data','Criado em'];
+  const rows=list.map(f=>{
+    const tipoLabel=f.tipoFrete==='hub'?'Coleta em Hub':'Frete Spot';
+    const perfil=f.tipoFrete==='hub'
+      ? (f.destinos||[]).map(d=>`${d.filial.replace('Mottu ','')}:${d.pallets}plt`).join('; ')
+      : (f.perfil?PM[f.perfil]:'');
+    return [displayId(f.id),tipoLabel,f.solicitanteNome||'',rotaResumo(f),f.tipoProduto||'',perfil,SM[f.status]?.label||f.status,f.transportadorNome||'',f.valor||'',f.lances?.length||0,f.data||'',f.createdAt||''];
+  });
+  const csv=[hdr,...rows].map(r=>r.map(v=>`"${String(v).replace(/"/g,'""')}"`).join(',')).join('\n');
+  const a=document.createElement('a');a.href=URL.createObjectURL(new Blob(['\uFEFF'+csv],{type:'text/csv;charset=utf-8'}));a.download=`fretes_${new Date().toISOString().slice(0,10)}.csv`;a.click();
+  showToast('CSV exportado!','success');
+}
+
+// ===================== MODAL =====================
+function openModal(id){document.getElementById(id).classList.add('open')}
+function closeModal(id){document.getElementById(id).classList.remove('open')}
+document.querySelectorAll('.modal-overlay').forEach(m=>m.addEventListener('click',e=>{if(e.target===m)m.classList.remove('open')}));
+
+// ===================== TOAST =====================
+function showToast(msg,type='info'){
+  const t=document.createElement('div');t.className=`toast ${type}`;t.textContent=msg;
+  document.getElementById('toast-container').appendChild(t);
+  setTimeout(()=>t.remove(),3500);
+}
+</script>
+<!-- TELA PÚBLICA: fornecedor externo acessa via link -->
+<div id="screen-publico" class="screen" style="align-items:center;justify-content:center;flex-direction:column;padding:24px">
+  <div style="width:100%;max-width:560px">
+    <div style="margin-bottom:24px">
+      <div style="font-size:10px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:var(--text3);margin-bottom:4px">Mottu</div>
+      <div style="font-family:var(--font-display);font-style:italic;font-weight:800;font-size:26px;text-transform:uppercase">Proposta de <span style="color:var(--accent)">Frete</span></div>
+    </div>
+    <div id="pub-conteudo"></div>
+  </div>
+</div>
+
+<!-- MODAL: LINK COMPARTILHÁVEL -->
+<div class="modal-overlay" id="modal-link">
+  <div class="modal narrow">
+    <div class="modal-head">
+      <div class="modal-title">Compartilhar frete</div>
+      <button class="modal-close" onclick="closeModal('modal-link')">✕</button>
+    </div>
+    <div class="modal-body">
+      <p style="font-size:13px;color:var(--text2);margin-bottom:16px">Envie este link para o fornecedor. Ele verá os detalhes do frete e, para enviar a proposta, precisará fazer login ou criar uma conta — assim ele terá um painel para acompanhar as propostas dele.</p>
+      <div style="display:flex;gap:8px;align-items:center">
+        <input type="text" id="link-input" readonly style="flex:1;padding:10px 14px;background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-size:12px;font-family:monospace">
+        <button class="btn-accent" onclick="copiarLink()" id="btn-copiar" style="white-space:nowrap">Copiar</button>
+      </div>
+      <div id="link-copiado" style="display:none;margin-top:10px;font-size:12px;color:var(--accent)">✓ Link copiado! Cole no WhatsApp, e-mail ou onde preferir.</div>
+      <div style="margin-top:16px;padding:12px;background:var(--bg3);border-radius:8px;font-size:12px;color:var(--text3);line-height:1.7">
+        <strong style="color:var(--text2)">O fornecedor verá:</strong><br>
+        Roteiro completo com endereços • Tipo e perfil da carga • Dimensões e peso • Foto da carga (se houver)<br><br>
+        <strong style="color:var(--text2)">O fornecedor NÃO verá:</strong><br>
+        Propostas de outros fornecedores • Dados internos da Mottu
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-secondary" onclick="closeModal('modal-link')">Fechar</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ===================== ID DISPLAY =====================
+// Formata IDs antigos (f001) e novos (FRT-...) de forma amigável
+function displayId(id){
+  if(id && id.startsWith('FRT-')){
+    // FRT-1234567890123-AB2C → mostra só FRT-AB2C para ficar curto
+    const parts = id.split('-');
+    return 'FRT-' + parts[parts.length-1];
+  }
+  return '#'+id;
+}
+
+// ===================== LINK COMPARTILHÁVEL =====================
+function abrirLink(freteId){
+  const base = window.location.href.split('#')[0];
+  const link = base + '#proposta/' + freteId;
+  document.getElementById('link-input').value = link;
+  document.getElementById('link-copiado').style.display = 'none';
+  document.getElementById('btn-copiar').textContent = 'Copiar';
+  openModal('modal-link');
+}
+
+function copiarLink(){
+  const input = document.getElementById('link-input');
+  navigator.clipboard.writeText(input.value).then(()=>{
+    document.getElementById('link-copiado').style.display = 'block';
+    document.getElementById('btn-copiar').textContent = '✓ Copiado!';
+    setTimeout(()=>{
+      document.getElementById('btn-copiar').textContent = 'Copiar';
+    }, 3000);
+  }).catch(()=>{
+    input.select();document.execCommand('copy');
+    document.getElementById('link-copiado').style.display = 'block';
+  });
+}
+
+// ===================== TELA PÚBLICA =====================
+let pubFreteId = null; // frete alvo ao chegar pelo link
+
+function mostrarTelaPublica(freteId){
+  pubFreteId = freteId;
+  const f = DB.fretes.find(x=>x.id===freteId);
+
+  document.getElementById('screen-login').classList.remove('active');
+  document.getElementById('screen-app').classList.remove('active');
+  document.getElementById('screen-publico').classList.add('active');
+
+  const c = document.getElementById('pub-conteudo');
+
+  if(!f){
+    c.innerHTML=`<div style="text-align:center;padding:48px;background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius-lg)">
+      <div style="font-size:40px;margin-bottom:12px">🔍</div>
+      <div style="font-family:var(--font-display);font-style:italic;font-weight:800;font-size:20px;text-transform:uppercase;margin-bottom:8px">Frete não encontrado</div>
+      <div style="color:var(--text2);font-size:13px">Este link pode ter expirado ou o frete foi removido.</div>
+    </div>`;
+    return;
+  }
+
+  if(f.status==='done'||f.status==='rejected'){
+    c.innerHTML=`<div style="text-align:center;padding:48px;background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius-lg)">
+      <div style="font-size:40px;margin-bottom:12px">${f.status==='done'?'✅':'❌'}</div>
+      <div style="font-family:var(--font-display);font-style:italic;font-weight:800;font-size:20px;text-transform:uppercase;margin-bottom:8px">${f.status==='done'?'Frete concluído':'Frete encerrado'}</div>
+      <div style="color:var(--text2);font-size:13px">Este frete não está mais aceitando propostas.</div>
+    </div>`;
+    return;
+  }
+
+  // Blocos reutilizáveis
+  const roteiroHtml = `
+    <div style="padding:20px 24px;border-bottom:1px solid var(--border)">
+      <div style="font-size:11px;font-weight:600;letter-spacing:.8px;text-transform:uppercase;color:var(--text3);margin-bottom:10px">Roteiro completo</div>
+      <div class="roteiro">${(f.pontos||[]).map(p=>`<div class="roteiro-item">
+        <div class="roteiro-dot ${p.tipo==='coleta'?'c':'e'}">${p.tipo==='coleta'?'C':'E'}</div>
+        <div class="roteiro-info"><div class="rn">${p.filial}</div><div class="ra">${p.endereco} — CEP ${p.cep} — ${p.cidade}</div></div>
+      </div>`).join('')}</div>
+    </div>`;
+
+  const cargaHtml = `
+    <div style="padding:20px 24px;border-bottom:1px solid var(--border)">
+      <div style="font-size:11px;font-weight:600;letter-spacing:.8px;text-transform:uppercase;color:var(--text3);margin-bottom:10px">Carga</div>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px">
+        <div><div style="font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:3px">Tipo</div><div style="font-size:13px">${f.tipoProduto||'—'}</div></div>
+        <div><div style="font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:3px">Perfil</div><div style="font-size:13px">${f.perfil?PM[f.perfil]:'—'}</div></div>
+        <div><div style="font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:3px">Data ideal de coleta</div><div style="font-size:13px;color:var(--accent);font-weight:600">${fmtDate(f.data)}</div></div>
+        <div><div style="font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:3px">Peso</div><div style="font-size:13px">${f.peso?f.peso+' kg':'—'}</div></div>
+        <div><div style="font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:3px">Dimensões</div><div style="font-size:13px">${f.dimensoes||'—'}</div></div>
+      </div>
+      ${f.obs?`<div style="margin-top:12px;padding:10px;background:var(--bg3);border-radius:8px;font-size:13px;color:var(--text2)">${f.obs}</div>`:''}
+      ${f.fotoNome?`<div style="margin-top:10px;padding:8px 12px;background:var(--bg3);border:1px solid var(--border);border-radius:8px;display:flex;align-items:center;gap:8px;font-size:12px;color:var(--text2)"><span>📷</span>Foto da carga: ${f.fotoNome}</div>`:''}
+    </div>`;
+
+  const headerHtml = `
+    <div style="padding:20px 24px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between">
+      <div>
+        <div style="font-size:11px;color:var(--text3);margin-bottom:2px">Solicitação ${displayId(f.id)}</div>
+        <div style="font-family:var(--font-display);font-style:italic;font-weight:800;font-size:16px;text-transform:uppercase">${rotaResumo(f)}</div>
+      </div>
+      <div style="text-align:right">
+        <div style="font-size:11px;color:var(--text3)">Data necessária</div>
+        <div style="font-weight:600;color:var(--accent)">${fmtDate(f.data)}</div>
+      </div>
+    </div>`;
+
+  // Se usuário já está logado como transportador
+  if(currentUser && currentUser.role==='transportador'){
+    renderFormProposta(c, f, headerHtml, roteiroHtml, cargaHtml);
+    return;
+  }
+
+  // Não logado → mostra frete + bloco de login/cadastro
+  c.innerHTML=`
+    <div style="background:var(--bg2);border:1px solid var(--border2);border-radius:var(--radius-lg);overflow:hidden;margin-bottom:16px">
+      ${headerHtml}${roteiroHtml}${cargaHtml}
+    </div>
+
+    <!-- Auth inline -->
+    <div style="background:var(--bg2);border:1px solid var(--border2);border-radius:var(--radius-lg);overflow:hidden" id="pub-auth-block">
+      <div style="padding:20px 24px;border-bottom:1px solid var(--border)">
+        <div style="font-family:var(--font-display);font-style:italic;font-weight:800;font-size:16px;text-transform:uppercase;margin-bottom:4px">Para enviar sua proposta</div>
+        <div style="font-size:13px;color:var(--text2)">Faça login ou crie sua conta — você poderá acompanhar todas as suas propostas depois.</div>
+      </div>
+      <div style="padding:20px 24px">
+        <div class="login-tabs" style="margin-bottom:20px">
+          <div class="login-tab active" onclick="pubSwitchTab('login')">Já tenho conta</div>
+          <div class="login-tab" onclick="pubSwitchTab('cadastro')">Criar conta</div>
+        </div>
+
+        <!-- Login -->
+        <div id="pub-form-login">
+          <div class="field"><label>E-mail</label><input type="email" id="pub-login-email" placeholder="seu@email.com"></div>
+          <div class="field"><label>Senha</label><input type="password" id="pub-login-pass" placeholder="••••••••"></div>
+          <button class="btn-primary" onclick="pubLogin('${f.id}')">Entrar e enviar proposta</button>
+        </div>
+
+        <!-- Cadastro -->
+        <div id="pub-form-cadastro" style="display:none">
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+            <div class="field"><label>Nome / Razão social *</label><input type="text" id="pub-cad-nome" placeholder="Transportes XYZ"></div>
+            <div class="field"><label>Telefone / WhatsApp *</label><input type="text" id="pub-cad-tel" placeholder="(11) 99999-0000"></div>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+            <div class="field"><label>Tipo</label><select id="pub-cad-tipo"><option>Autônomo</option><option>Transportadora</option></select></div>
+            <div class="field"><label>CPF / CNPJ</label><input type="text" id="pub-cad-doc" placeholder="opcional"></div>
+          </div>
+          <div class="field"><label>E-mail *</label><input type="email" id="pub-cad-email" placeholder="seu@email.com"></div>
+          <div class="field"><label>Senha *</label><input type="password" id="pub-cad-pass" placeholder="mínimo 6 caracteres"></div>
+          <div class="field">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+              <label style="margin:0">Estados que você atende</label>
+              <button type="button" onclick="toggleTodosEstados('pub-cad-estados')" style="font-size:11px;color:var(--accent);cursor:pointer;padding:2px 8px;border:1px solid rgba(0,177,49,.3);border-radius:4px;background:var(--accent-dim2)">Selecionar todos</button>
+            </div>
+            <div id="pub-cad-estados" class="estados-grid"></div>
+          </div>
+          <button class="btn-primary" onclick="pubCadastrar('${f.id}')">Criar conta e enviar proposta</button>
+        </div>
+      </div>
+    </div>
+
+    <div style="text-align:center;margin-top:16px;font-size:11px;color:var(--text3)">
+      Plataforma de fretes Mottu • Você só verá suas próprias propostas
+    </div>`;
+}
+
+function pubSwitchTab(t){
+  document.querySelectorAll('#pub-auth-block .login-tab').forEach((el,i)=>el.classList.toggle('active',(t==='login'&&i===0)||(t==='cadastro'&&i===1)));
+  document.getElementById('pub-form-login').style.display=t==='login'?'block':'none';
+  document.getElementById('pub-form-cadastro').style.display=t==='cadastro'?'block':'none';
+  if(t==='cadastro') setTimeout(()=>renderEstadosGrid('pub-cad-estados'),50);
+}
+
+function pubLogin(freteId){
+  const email=document.getElementById('pub-login-email').value.trim();
+  const pass=document.getElementById('pub-login-pass').value;
+  const user=DB.users.find(u=>u.email===email&&u.pass===pass);
+  if(!user){showToast('E-mail ou senha incorretos','error');return}
+  if(user.role==='gestor'){showToast('Conta de gestor não pode dar lances','error');return}
+  currentUser=user;
+  const f=DB.fretes.find(x=>x.id===freteId);
+  const c=document.getElementById('pub-conteudo');
+  const f2=DB.fretes.find(x=>x.id===freteId);
+  const headerHtml=`<div style="padding:20px 24px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between"><div><div style="font-size:11px;color:var(--text3);margin-bottom:2px">Solicitação ${displayId(f2.id)}</div><div style="font-family:var(--font-display);font-style:italic;font-weight:800;font-size:16px;text-transform:uppercase">${rotaResumo(f2)}</div></div><div style="text-align:right"><div style="font-size:11px;color:var(--text3)">Data necessária</div><div style="font-weight:600;color:var(--accent)">${fmtDate(f2.data)}</div></div></div>`;
+  const roteiroHtml=`<div style="padding:20px 24px;border-bottom:1px solid var(--border)"><div style="font-size:11px;font-weight:600;letter-spacing:.8px;text-transform:uppercase;color:var(--text3);margin-bottom:10px">Roteiro</div><div class="roteiro">${(f2.pontos||[]).map(p=>`<div class="roteiro-item"><div class="roteiro-dot ${p.tipo==='coleta'?'c':'e'}">${p.tipo==='coleta'?'C':'E'}</div><div class="roteiro-info"><div class="rn">${p.filial}</div><div class="ra">${p.endereco} — ${p.cidade}</div></div></div>`).join('')}</div></div>`;
+  renderFormProposta(c,f2,headerHtml,roteiroHtml,'');
+}
+
+function pubCadastrar(freteId){
+  const nome=document.getElementById('pub-cad-nome').value.trim();
+  const tel=document.getElementById('pub-cad-tel').value.trim();
+  const email=document.getElementById('pub-cad-email').value.trim();
+  const pass=document.getElementById('pub-cad-pass').value;
+  const tipo=document.getElementById('pub-cad-tipo').value;
+  const doc=document.getElementById('pub-cad-doc').value.trim();
+  const estados=getEstadosSelecionados('pub-cad-estados');
+  if(!nome||!tel||!email||!pass){showToast('Preencha todos os campos obrigatórios','error');return}
+  if(pass.length<6){showToast('Senha deve ter mínimo 6 caracteres','error');return}
+  if(DB.users.find(u=>u.email===email)){showToast('E-mail já cadastrado — faça login','error');return}
+  const user={id:'u'+Date.now(),name:nome,email,pass,role:'transportador',tipo,doc,tel,estados};
+  DB.users.push(user);
+  currentUser=user;
+  showToast('Conta criada! Agora envie sua proposta.','success');
+  const f=DB.fretes.find(x=>x.id===freteId);
+  const c=document.getElementById('pub-conteudo');
+  const headerHtml=`<div style="padding:20px 24px;border-bottom:1px solid var(--border)"><div style="font-size:11px;color:var(--text3);margin-bottom:2px">Solicitação ${displayId(f.id)}</div><div style="font-family:var(--font-display);font-style:italic;font-weight:800;font-size:16px;text-transform:uppercase">${rotaResumo(f)}</div></div>`;
+  renderFormProposta(c,f,headerHtml,'','');
+}
+
+function renderFormProposta(c, f, headerHtml, roteiroHtml, cargaHtml){
+  const jaDei = f.lances?.some(l=>l.transportadorId===currentUser.id);
+
+  c.innerHTML=`
+    <div style="background:var(--bg2);border:1px solid var(--border2);border-radius:var(--radius-lg);overflow:hidden;margin-bottom:16px">
+      ${headerHtml}${roteiroHtml}${cargaHtml}
+
+      <!-- Proposta ou confirmação -->
+      <div style="padding:20px 24px" id="pub-form-area">
+        ${jaDei ? `
+          <div style="text-align:center;padding:24px">
+            <div style="font-size:36px;margin-bottom:8px">✅</div>
+            <div style="font-family:var(--font-display);font-style:italic;font-weight:800;font-size:18px;text-transform:uppercase;color:var(--accent);margin-bottom:6px">Proposta já enviada</div>
+            <div style="font-size:13px;color:var(--text2)">Você já enviou uma proposta para este frete. Acompanhe pelo seu painel.</div>
+            <button class="btn-accent" style="margin-top:16px" onclick="irParaPainelTransportador()">Ver meu painel →</button>
+          </div>` : `
+          <div style="font-size:11px;font-weight:600;letter-spacing:.8px;text-transform:uppercase;color:var(--text3);margin-bottom:14px">
+            Sua proposta — logado como <span style="color:var(--accent)">${currentUser.name}</span>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px">
+            <div class="field" style="margin:0"><label>Valor proposto (R$) *</label><input type="number" id="pub-valor" placeholder="0,00"></div>
+            <div class="field" style="margin:0"><label>Prazo de entrega *</label><input type="date" id="pub-prazo" value="${f.data}"></div>
+          </div>
+          <div class="field" style="margin-bottom:16px"><label>Observações / condições</label><textarea id="pub-obs" rows="3" placeholder="Tipo de veículo, disponibilidade, condições especiais..."></textarea></div>
+          <div style="display:flex;gap:10px;align-items:center">
+            <button class="btn-primary" style="flex:1" onclick="submitPropostaLogada('${f.id}')">Enviar proposta</button>
+            <button class="btn-secondary" onclick="irParaPainelTransportador()">Ir para meu painel</button>
+          </div>
+        `}
+      </div>
+    </div>
+    <div style="text-align:center;margin-top:12px;font-size:11px;color:var(--text3)">
+      Plataforma de fretes Mottu • Você só vê suas próprias propostas
+    </div>`;
+}
+
+function submitPropostaLogada(freteId){
+  const valor=document.getElementById('pub-valor').value;
+  const prazo=document.getElementById('pub-prazo').value;
+  const obs=document.getElementById('pub-obs').value;
+  if(!valor||!prazo){showToast('Preencha valor e prazo','error');return}
+  const f=DB.fretes.find(x=>x.id===freteId);
+  f.lances=f.lances||[];
+  f.lances.push({transportadorId:currentUser.id,transportadorNome:currentUser.name,valor:parseFloat(valor),prazo,obs,criadoEm:now()});
+  document.getElementById('pub-form-area').innerHTML=`
+    <div style="text-align:center;padding:24px">
+      <div style="font-size:40px;margin-bottom:10px">✅</div>
+      <div style="font-family:var(--font-display);font-style:italic;font-weight:800;font-size:20px;text-transform:uppercase;color:var(--accent);margin-bottom:8px">Proposta enviada!</div>
+      <div style="font-size:13px;color:var(--text2);margin-bottom:16px">Sua proposta foi recebida. O gestor entrará em contato se aprovada.</div>
+      <button class="btn-accent" onclick="irParaPainelTransportador()">Ver meu painel →</button>
+    </div>`;
+}
+
+function irParaPainelTransportador(){
+  window.location.hash='';
+  document.getElementById('screen-publico').classList.remove('active');
+  showApp();
+}
+
+// ===================== HASH ROUTING =====================
+function checkHash(){
+  const hash = window.location.hash;
+  if(hash.startsWith('#proposta/')){
+    const freteId = hash.replace('#proposta/','');
+    mostrarTelaPublica(freteId);
+  }
+}
+
+window.addEventListener('hashchange', checkHash);
+checkHash(); // verifica ao carregar a página
+
+</script>
+</body>
+</html>
